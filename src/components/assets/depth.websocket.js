@@ -15,7 +15,7 @@ const obj = Object.create(protoMethods);
     getClient: function(props, setData, data, msg){
         let url=''
         if(props.exchange.name == 'Binance'){
-            url = 'wss://stream.binance.com:9443/ws/'+props.selectedTicker.replace(/_/g,"").toLowerCase()+'@depth5@1000ms';
+            url = 'wss://stream.binance.com:9443/ws/'+props.selectedTicker.replace(/_/g,"").toLowerCase()+'@depth5@100ms';
         } else {
             url = 'wss://ws-manager-compress.bitmart.com?protocol=1.1'
         }

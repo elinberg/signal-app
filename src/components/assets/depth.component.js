@@ -83,7 +83,7 @@ const thisExchange = ex.filter(exchange =>
             //msg='';
         }
         let client = [];
-        msg = JSON.stringify({"op": "subscribe", "args":["spot/depth5:"+props.selectedTicker+'@100ms']});
+        msg = JSON.stringify({"op": "subscribe", "args":["spot/depth5:"+props.selectedTicker]});
         //console.log('DEPTH MSG', msg)
         client[props.exchange.name] = new DepthWebSocketConnection(props,setData, data ,msg );
         
