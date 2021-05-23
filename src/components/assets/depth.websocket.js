@@ -17,7 +17,7 @@ const obj = Object.create(protoMethods);
         if(props.exchange.name == 'Binance'){
             url = 'wss://stream.binance.com:9443/ws/'+props.selectedTicker.replace(/_/g,"").toLowerCase()+'@depth5@1000ms';
         } else {
-            url = 'wss://ws-manager.bitmart.com?protocol=1.1'
+            url = 'wss://ws-manager-compress.bitmart.com?protocol=1.1'
         }
 
     this.client = new RobustWebSocket(url, null, {
