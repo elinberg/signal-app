@@ -6,7 +6,7 @@ import { AuthContext } from "../App";
 
 
     const { state, dispatch } = React.useContext(AuthContext);  
-    //const msg = {  message:'Fuck Yeah', alertType: 'success', timeout:10000 } 
+     
     useEffect(() => {
     // dispatch({
     //     type: SET_ALERT,

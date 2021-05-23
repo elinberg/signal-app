@@ -53,7 +53,7 @@ export default class CreateAsset extends Component {
             //todo_completed: this.state.todo_completed
         };
 
-        axios.post('http://localhost:8080/api/asset/add', newAsset)
+        axios.post('/api/asset/add', newAsset)
 
             .then(res => {
                 console.log(res.data);

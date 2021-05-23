@@ -70,7 +70,7 @@ export const Login = () => {
         };
         
         
-        axios.post('http://localhost:8080/api/auth/signin', newLogin)
+        axios.post('/api/auth/signin', newLogin)
             .then(res => {
                 console.log(res.data);
                 

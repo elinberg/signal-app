@@ -47,7 +47,7 @@ export default class Register extends Component {
             //todo_completed: this.state.todo_completed
         };
 
-        axios.post('http://localhost:8080/api/auth/signup', newRegistration)
+        axios.post('/api/auth/signup', newRegistration)
 
             .then(res => {
                 console.log(res.data);

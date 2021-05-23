@@ -56,7 +56,7 @@ const ExchangeTradeList = () => {
     //useEffect(() => {
        useEffect(() => {
            
-        axios.get('http://localhost:8080/api/exchange/')
+        axios.get('/api/exchange/')
             .then(response => {
                 //this.setState({ asset: response.data });
                 console.log('GET EX',response.data, data)
