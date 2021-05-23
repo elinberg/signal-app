@@ -41,7 +41,7 @@ const obj = Object.create(protoMethods);
         this.client.binaryType='blob'; 
         this.client.addEventListener('open', function(event) {
          console.log('WebSocket Client Connected');
-         console.log('SENDING', msg)
+         //console.log('SENDING', msg)
          this.client.send(msg)
         })
         var prevPrices = [];

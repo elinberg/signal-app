@@ -95,11 +95,12 @@ const thisExchange = ex.filter(exchange =>
         let iid = setInterval(() =>{
             
             if(client['Bitmart'].readyState == 1){
-                //console.log('DEPTH SENDING:',msg)
+                console.log('DEPTH SENDING:',msg)
                 client['Bitmart'].send(msg);
                 clearInterval(iid)
             }
         }, 500);
+        console.log('DEPTH SENT:',msg)
 
         let iid2 = setInterval(() =>{
             //console.log('READYSTATE1',client['Bitmart'].readyState)
