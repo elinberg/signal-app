@@ -1,0 +1,9 @@
+name = "signal-app"
+type = 'webpack'
+account_id = '904b5b7cfb77c2f503e5a519169a1cde'
+route = ''
+zone_id = ''
+usage_model = ''
+workers_dev = true
+target_type = "webpack"
+site = {bucket = "./build",entry-point = "workers-site"}
