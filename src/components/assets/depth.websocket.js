@@ -17,7 +17,7 @@ const obj = Object.create(protoMethods);
         if(props.exchange.name == 'Binance'){
             url = 'wss://stream.binance.com:9443/ws/'+props.selectedTicker.replace(/_/g,"").toLowerCase()+'@depth5@1000ms';
         } else {
-            url = 'wss://ws-manager-compress.bitmart.news?protocol=1.1'
+            url = 'wss://ws-manager-compress.bitmart.com?protocol=1.1'
         }
 
     this.client = new RobustWebSocket(url, null, {
@@ -42,7 +42,7 @@ const obj = Object.create(protoMethods);
         this.client.addEventListener('open', function(event) {
          console.log('WebSocket Client Connected');
          //console.log('SENDING', msg)
-         this.client.send(msg)
+         //this.client.send(msg)
         })
         var prevPrices = [];
         this.client.addEventListener('message', function(event) {
