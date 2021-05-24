@@ -99,7 +99,7 @@ const reducer = (state, action) => {
   function App() {
 
     if (window.Worker) {
-      var myWorker = new Worker("wakeup.js");
+      var myWorker = new Worker("./public/wakeup.js");
       myWorker.onmessage = function (ev) {
         if (ev && ev.data === 'wakeup') {
           console.log('I woke up')
