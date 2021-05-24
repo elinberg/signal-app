@@ -20,6 +20,14 @@ const initialState = {
   message: null,
   alerts: []
 };
+if (window.Worker) {
+var myWorker = new Worker("wakeup.js");
+myWorker.onmessage = function (ev) {
+  if (ev && ev.data === 'wakeup') {
+     console.log('I woke up')
+  }
+}
+}
 
 const reducer = (state, action) => {
   switch (action.type) {
