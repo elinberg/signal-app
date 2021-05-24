@@ -1,4 +1,4 @@
-import React from "react";
+import React , {useEffect } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css'
@@ -98,6 +98,15 @@ const reducer = (state, action) => {
 
   function App() {
 
+ 
+
+    //let nav;
+    //window.$prevPrice = '0.00'
+    //console.log('Store State',this.props.store.getState())
+    const [state, dispatch] = React.useReducer(reducer, initialState);
+
+
+  useEffect(() => {
     if (window.Worker) {
       var myWorker = new Worker("./wakeup.js");
       myWorker.onmessage = function (ev) {
@@ -105,12 +114,10 @@ const reducer = (state, action) => {
           console.log('I woke up')
         }
       }
-    }
+    } 
+  },[]);
 
-    //let nav;
-    //window.$prevPrice = '0.00'
-    //console.log('Store State',this.props.store.getState())
-    const [state, dispatch] = React.useReducer(reducer, initialState);
+
     //console.log('App store 1',this.props.authenticated);
     //var isLoggedIn = this.props.store.getState();
 
