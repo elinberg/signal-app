@@ -5,8 +5,8 @@ import './App.css'
 import Alert from "./components/alert.component";
 import Nav from "./components/nav.component";
 import Sidebar from "./components/sidebar.component";
-import worker from "./worker.js";
-import WebWorker from "./workerSetup";
+//import worker from "./worker.js";
+//import WebWorker from "./workerSetup";
 import {v4 as uuid } from 'uuid';
 import { SET_ALERT, REMOVE_ALERT, LOGIN, LOGOUT, SET_ALERT_OVERWRITE} from "./components/types";
 
@@ -107,9 +107,7 @@ const reducer = (state, action) => {
 
 
   useEffect(() => {
-    if (window.Worker) {
-      worker = new WebWorker(worker);
-    } 
+
   },[]);
 
 
