@@ -1,12 +1,10 @@
-import React , {useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css'
 import Alert from "./components/alert.component";
 import Nav from "./components/nav.component";
 import Sidebar from "./components/sidebar.component";
-//import worker from "./worker.js";
-//import WebWorker from "./workerSetup";
 import {v4 as uuid } from 'uuid';
 import { SET_ALERT, REMOVE_ALERT, LOGIN, LOGOUT, SET_ALERT_OVERWRITE} from "./components/types";
 
@@ -106,9 +104,7 @@ const reducer = (state, action) => {
     const [state, dispatch] = React.useReducer(reducer, initialState);
 
 
-  useEffect(() => {
-
-  },[]);
+ 
 
 
     //console.log('App store 1',this.props.authenticated);
