@@ -12,14 +12,7 @@ import { SET_ALERT, REMOVE_ALERT, LOGIN, LOGOUT, SET_ALERT_OVERWRITE} from "./co
 
 
 export const AuthContext = React.createContext();
-if (window.Worker) {
-  var myWorker = new Worker("wakeup.js");
-  myWorker.onmessage = function (ev) {
-    if (ev && ev.data === 'wakeup') {
-      console.log('I woke up')
-    }
-  }
-}
+
 const initialState = {
   isAuthenticated: false,
   username: null,
@@ -104,8 +97,18 @@ const reducer = (state, action) => {
   
 
   function App() {
+
+    if (window.Worker) {
+      var myWorker = new Worker("wakeup.js");
+      myWorker.onmessage = function (ev) {
+        if (ev && ev.data === 'wakeup') {
+          console.log('I woke up')
+        }
+      }
+    }
+
     //let nav;
-    window.$prevPrice = '0.00'
+    //window.$prevPrice = '0.00'
     //console.log('Store State',this.props.store.getState())
     const [state, dispatch] = React.useReducer(reducer, initialState);
     //console.log('App store 1',this.props.authenticated);
