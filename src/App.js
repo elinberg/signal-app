@@ -12,7 +12,14 @@ import { SET_ALERT, REMOVE_ALERT, LOGIN, LOGOUT, SET_ALERT_OVERWRITE} from "./co
 
 
 export const AuthContext = React.createContext();
-
+if (window.Worker) {
+  var myWorker = new Worker("wakeup.js");
+  myWorker.onmessage = function (ev) {
+    if (ev && ev.data === 'wakeup') {
+      console.log('I woke up')
+    }
+  }
+}
 const initialState = {
   isAuthenticated: false,
   username: null,
@@ -20,14 +27,7 @@ const initialState = {
   message: null,
   alerts: []
 };
-if (window.Worker) {
-var myWorker = new Worker("wakeup.js");
-myWorker.onmessage = function (ev) {
-  if (ev && ev.data === 'wakeup') {
-     console.log('I woke up')
-  }
-}
-}
+
 
 const reducer = (state, action) => {
   switch (action.type) {
