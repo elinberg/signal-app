@@ -27,7 +27,7 @@ const obj = Object.create(protoMethods);
                 // will return the number of milliseconds to wait to reconnect, or a non-Number to not reconnect.
                 // see below for more examples; below is the default functionality.
                 shouldReconnect: function(event, ws) {
-                    console.log('Reconnecting')
+                    console.log('Reconnecting', event,ws, url)
                     if (event.code === 1008 || event.code === 1011) return
                     return [0, 3000, 10000][ws.attempts]
                 },
@@ -41,13 +41,25 @@ const obj = Object.create(protoMethods);
         this.client.binaryType='blob'; 
         this.client.addEventListener('open', function(event) {
          console.log('WebSocket Client Connected');
+         if(msg.length > 0 && props.exchange.name == 'Bitmart'){
+            this.send(msg);
+        }
+        // let iid2 = setInterval(() =>{
+        //     //console.log('READYSTATE1',client['Bitmart'].readyState)
+        //     if(props.exchange.name == 'Bitmart'){
+        //         console.log('PINGING:','ping')
+        //         this.send('ping');
+        //         //client['Bitmart'].send(msg);
+        //     } 
+        // }, 10000);
+
         })
         var prevPrices = [];
         this.client.addEventListener('message', function(event) {
 
         //console.log('we got: ' + event.data)
         if(msg.length > 0){
-            //this.client.send(msg);
+            //client.send(msg);
         }
         // var newState;
              if(event.data instanceof Blob) {
@@ -118,6 +130,7 @@ const obj = Object.create(protoMethods);
 
         this.client.addEventListener('close', function(event) {
             prevPrices = [];
+            
             setData({
                 high24hr: '',
                 low24hr: '',

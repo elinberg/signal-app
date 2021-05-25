@@ -3,14 +3,19 @@ import { useHistory } from "react-router";
 import { AuthContext } from '../../App';
 import WebSocketConnection from './websocket';
 const _transform = require('./transformer')
-
+let count = 0;
+let prices = [];
+let gains = [];
+let losses = [];
 const Spot = props => {
 const { state, dispatch } = React.useContext(AuthContext); 
 const history = useHistory();
 const [intervalId, setIntervalId ] = useState('');
 const [ data, setData ]= useState( {})
+//const [ prices, setPrices ]= useState( [])
 //const [ prevPrice, setPrevPrice ]= useState('0.00')  ;    
 let [online, isOnline] = useState(navigator.onLine);
+
 const setOnline = () => {
     console.log('We are online!');
     isOnline(true);
@@ -21,15 +26,68 @@ const setOffline = () => {
     //props.clearTicker();
     history.push('/login?offline=true')
     isOnline(false);
-};  
+}; 
+
 const onPriceClick = e => {
     console.log('Price Click', e.target.innerText);
     let event = {target:{value:e.target.innerText}}
     props.onChangePrice(event);
 }
+
+useEffect(()=>{
+    //let prices = [];
+    // if(props !== undefined && props.selectedTicker !== undefined && props.selectedTicker.length > 0){
+
+    //     if(data.priceStyle==='text-danger'){
+    //         //loss
+    //         if(losses.length < 14){
+    //             losses.push(parseFloat(data.prevPrice)-parseFloat(data.lastPrice))
+    //             console.log('Losses',parseFloat(data.prevPrice)-parseFloat(data.lastPrice))
+    //         }
+            
+    //     } else if(data.priceStyle==='text-success'){
+    //         if(gains.length < 14){
+    //             gains.push(parseFloat(data.lastPrice)-parseFloat(data.prevPrice))
+    //             console.log('Gains', parseFloat(data.lastPrice)-parseFloat(data.prevPrice))
+    //         }
+    //     }
+
+    //     console.log(gains,losses)
+    //     if(gains.length == 14 && losses.length == 14){
+    //         console.log('GOT HERE')
+    //     //let gains = prices.filter(price => price > 0);
+    //     console.log('Gains',gains)
+    //     let avgGain = (gains) => gains.reduce((a, b) => a + b) / gains.length;
+    //     //let losses = prices.filter(price => price < 0);
+    //     let avgLoss= (losses) => losses.reduce((a, b) => a + b) / losses.length;
+    //     console.log('Losses',losses)
+    //     let gain = avgGain(gains);
+    //     let loss = avgLoss(losses)
+    //     let rs = Math.abs(gain) / Math.abs(loss);
+    //     let rsi = 100 - (100 / (1 + rs));
+    //     console.log('RSI',rsi);
+    //     gains=[];
+    //     losses=[]
+    //     }
+    //     //prices = [];
+        
+
+    // } else {
+        
+    //     count = 0;
+
+    // count++
+    // console.log(count);
+    // }//if selectedTicker
+     
+},[data.lastPrice, props.selectedTicker])
+
+
+
 useEffect(() => {
     window.addEventListener('offline', setOffline);
     window.addEventListener('online', setOnline);
+
         //console.log('HANDLESTATE')
   const ex = JSON.parse(localStorage.getItem('exchanges'))
         //console.log('local', ex)
@@ -93,28 +151,27 @@ const thisExchange = ex.filter(exchange =>
         //c//lient.push(ws);
         if(props.exchange.name === 'Bitmart'){
 
-           
+        // let iid = setInterval(() =>{
+            
+        //     if(client['Bitmart'].readyState == 1){
+        //         console.log('SENDING:',msg)
+        //         client['Bitmart'].send(msg);
+        //         clearInterval(iid)
+        //     }
+        // }, 500);
 
         let iid = setInterval(() =>{
-            
-            if(client['Bitmart'].readyState == 1){
-                //console.log('SENDING:',msg, online)
-                client['Bitmart'].send(msg);
-                clearInterval(iid)
-            }
-        }, 500);
-
-        let iid2 = setInterval(() =>{
             //console.log('READYSTATE1',client['Bitmart'].readyState)
             if(client['Bitmart'].readyState == 1 ){
-                //console.log('PINGIN:','ping')
+                //console.log('PINGING:','ping')
                 client['Bitmart'].send('ping');
                 //client['Bitmart'].send(msg);
             } 
-        }, 10000);
+        }, 15000);
+        setIntervalId(iid)
 
         }
-
+        
         
         //console.log('CLIENT', client);
       
@@ -132,7 +189,8 @@ const thisExchange = ex.filter(exchange =>
             //send unsubscrube message here
             //client.send(msg)
             if(client['Bitmart']){
-                
+                console.log(client['Bitmart'])
+                clearInterval(intervalId)
             client['Bitmart'].close();
             }
             if(client['Binance']){
@@ -145,7 +203,7 @@ const thisExchange = ex.filter(exchange =>
 
 },[props.selectedTicker]);
 
-        
+//console.log(count++) 
         return (
             
             <div className="container" style={{marginTop: '2px', marginBottom: '2px'}}>

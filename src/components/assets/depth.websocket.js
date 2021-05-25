@@ -41,8 +41,17 @@ const obj = Object.create(protoMethods);
         this.client.binaryType='blob'; 
         this.client.addEventListener('open', function(event) {
          console.log('WebSocket Client Connected');
-         //console.log('SENDING', msg)
-         //this.client.send(msg)
+         if(msg.length > 0 && props.exchange.name == 'Bitmart'){
+            this.send(msg);
+        }
+        // let iid2 = setInterval(() =>{
+        //     //console.log('READYSTATE1',client['Bitmart'].readyState)
+        //     if(props.exchange.name == 'Bitmart'){
+        //         console.log('PINGING:','ping')
+        //         this.send('ping');
+        //         //client['Bitmart'].send(msg);
+        //     } 
+        // }, 15000);
         })
         var prevPrices = [];
         this.client.addEventListener('message', function(event) {

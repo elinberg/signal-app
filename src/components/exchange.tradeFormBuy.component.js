@@ -3,6 +3,7 @@ import axios from 'axios';
 import TickerSelect from "./assets/ticker.select.component";
 import Spot from "./assets/spot.component";
 import Depth from "./assets/depth.component";
+import Technicals from "./assets/technicals.component";
 import Wallet from "./assets/wallet.component";
 //import Kline from "./assets/kline.component";
 import {Tabs, Tab, Modal, Row, Button, Col, Form, Card, Container} from "react-bootstrap";
@@ -208,6 +209,7 @@ return (
                                 onChange={onChangeName}
                                 />
                     {/* <Spot onRef={ref => (spot = ref)} baseAsset={data.baseAsset}  exchange={props.exchange} clearTicker={clearTicker} selectedTicker={data.selectedTicker}  /> */}
+                    <Technicals />
                     </div>
                     <div className="form-group col-sm-6"> 
                     

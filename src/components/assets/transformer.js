@@ -75,7 +75,7 @@ class Transformer {
             high24hr: json.h,
             low24hr: json.l,
             open24hr: json.o,
-            volume24hr: json.v.split('.')[0],
+            volume24hr: json.v !== undefined ? json.v.split('.')[0]: '',
             priceStyle: priceStyle,
             prevPrice: prevPrices[len-1],
             baseAsset: symbol.replace(/.*_/g,"")

@@ -92,24 +92,25 @@ const thisExchange = ex.filter(exchange =>
 
            
 
-        let iid = setInterval(() =>{
+        // let iid = setInterval(() =>{
             
-            if(client['Bitmart'].readyState == 1){
-                //console.log('DEPTH SENDING:',msg)
-                client['Bitmart'].send(msg);
-                clearInterval(iid)
-            }
-        }, 500);
-        console.log('DEPTH SENT:',msg)
+        //     if(client['Bitmart'].readyState == 1){
+        //         //console.log('DEPTH SENDING:',msg)
+        //         client['Bitmart'].send(msg);
+        //         clearInterval(iid)
+        //     }
+        // }, 500);
+        // console.log('DEPTH SENT:',msg)
 
-        let iid2 = setInterval(() =>{
+        let iid = setInterval(() =>{
             //console.log('READYSTATE1',client['Bitmart'].readyState)
             if(client['Bitmart'].readyState == 1 ){
                 //console.log('PINGIN:','ping')
                 client['Bitmart'].send('ping');
                 //client['Bitmart'].send(msg);
             } 
-        }, 10000);
+        }, 15000);
+        setIntervalId(iid);
 
         }
 
@@ -131,6 +132,7 @@ const thisExchange = ex.filter(exchange =>
             //client.send(msg)
             if(client['Bitmart']){
                 //client.send(msg)
+                clearInterval(intervalId)
             client['Bitmart'].close();
             }
             if(client['Binance']){
