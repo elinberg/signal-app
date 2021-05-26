@@ -1,13 +1,24 @@
 import React from 'react';
-//import small from "./small.component";
+
  const Wallet = props => {
      let avail = '';
      let currency = '';
+     let frozen = '';
+     let asset, wallet;
 
+     if(props.tab == 'buy'){
+        asset = props.ticker !== undefined ? props.ticker.replace(/.*_/g,"") : '';
+    } else {
+        asset =  props.ticker !== undefined ? props.ticker.replace(/_.*/g,""): '';
+    }
+     wallet = props.wallet.filter(account => 
+        account.id === asset
+    ) 
      console.log('WALLET TAG', props)
-     if(props.wallet.length > 0 ){
-        avail = props.wallet[0].available;
-        currency = props.wallet[0].id
+     if(wallet.length > 0 ){
+        avail = wallet[0].available;
+        frozen = wallet[0].frozen;
+        currency = wallet[0].id
      }
 
      const percent25 = e => {
@@ -52,6 +63,7 @@ const percent100 = e => {
     </div>
      <div className="row">    
         <div style={{whiteSpace:'nowrap'}} className="col-sm-12"><small className="tiny">Avail. {avail} {currency}</small></div> 
+        <div style={{whiteSpace:'nowrap'}} className="col-sm-12"><small className="tiny">In Orders {frozen} </small></div> 
     </div>
     </div>
     )

@@ -22,7 +22,7 @@ import {Tabs, Tab, Modal, Row, Button, Col, Form, Card, Container} from "react-b
     }
     useEffect(() => {
         
-        console.log('TAB',this)
+        //console.log('TAB',this)
         // dispatch({
         //     type: SET_ALERT,
         //     payload: msg
@@ -44,7 +44,7 @@ return (
                 {/* <ExchangeTradeFormBuy exchange={props.exchange} />  */}
                 </div>
             </Tabs>
-            <ExchangeTradeFormBuy setTab={setKey} tab={key} exchange={props.exchange} /> 
+            <ExchangeTradeFormBuy onTabSelect={onSelect} setTab={setKey} tab={key} exchange={props.exchange} /> 
             {/* <div class="btn-group" style={{width:'100%'}} role="group" aria-label="Buy or Sell">
                 <button type="button" class="btn btn-primary btn-block btn-sm mt-0 active">Buy</button>
                 <button type="button" class="btn btn-secondary btn-block btn-sm mt-0">Sell</button>

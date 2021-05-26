@@ -22,11 +22,12 @@ import { AuthContext } from '../App';
         
         //const spotref=useRef();
         //onChangeTicker = onChangeTicker.bind(this);
-        //onChangeName = onChangeName.bind(this);
+        
         //onSubmit = onSubmit.bind(this);
         var ex = JSON.parse(localStorage.getItem('exchanges'))
         console.log('local',ex, props)
         console.log('TAB:',props.tab)
+        
         var thisExchange = ex.filter(exchange => 
             props.exchange.name === exchange.name
         )
@@ -60,7 +61,7 @@ import { AuthContext } from '../App';
     console.log('B4UseEffect', data);    
 useEffect(() => {
     //setData(data);
-    
+    onChangeTab = onChangeTab.bind(props.onTabSelect);
      console.log('DuringUseEffect', props, data)
 console.log(props.exchange.url)
       axios.get(props.exchange.url+'/tickers').then(result => {
@@ -71,7 +72,7 @@ console.log(props.exchange.url)
         })
 
         console.log('TICKERS:',props.exchange.url,result.data.tickers);
-
+            
             setData({
             ...data,
             tickers:result.data.tickers
@@ -101,7 +102,9 @@ console.log(props.exchange.url)
       };
 }, []);  
 
-  
+  let onChangeTab = e => {
+      console.log('Tab Event');
+  }
 
  const onFocusTicker = e => {
 
@@ -124,15 +127,20 @@ const onChangeTicker = e => {
     //    
 console.log('OnChangeTicker', e)
     
-         
+    let asset;
     //   setData({
         //       name: e.target.value
         //   });
         //console.log('MYWALLET',mywallet)
+        if(props.tab == 'buy'){
+            asset = e.value.replace(/.*_/g,"");
+        } else {
+            asset = e.value.replace(/_.*/g,"");
+        }
         setData({
             ...data,
             selectedTicker: e.value ? e.value : "",
-            baseAsset: e.value !== undefined ? e.value.replace(/.*_/g,"") : ''
+            baseAsset: e.value !== undefined ? asset : ''
           });
           //data.wallet.filter( account => account.id === e.value.replace(/.*_/g,"") )
        // console.log('FILTERED WALLET',data.wallet, e.value.replace(/.*_/g,""));
@@ -191,17 +199,9 @@ function onSubmit(e) {
     // props.hideModal();
     //console.log(props)
 }
-    // const mywallet = data.wallet.filter(account => 
-    //     account.id === data.baseAsset
-    // )
-
-
-
-    let mywallet = wallet.wallet.filter(account => 
-        account.id === data.baseAsset
-    )   
+     
        
-       console.log('RETURN FORM', data)
+       console.log('RETURN FORM', data, props)
 return (       
             <div className="container pl-0" style={{marginTop: '10px', marginLeft:'2px', marginRight:'2px'}}>
                 
@@ -243,7 +243,7 @@ return (
                                 onChange={onChangeQty}
                                 />
                     </div>
-                    <Wallet wallet={mywallet}  setAmount={onChangeAmount}/>
+                    <Wallet tab={props.tab} wallet={wallet.wallet} ticker={data.selectedTicker} setAmount={onChangeAmount}/>
                     <div className="form-group"> 
                         <label>Total:<div onChange={onChangeAmount}>{data.amount}</div> </label>
                     </div>
@@ -266,7 +266,7 @@ return (
                                 onChange={onChangeName}
                                 />
                 </div>
-                <div><Wallet wallet={mywallet}  setAmount={onChangeAmount}/></div>
+                <div><Wallet tab={props.tab} wallet={wallet.wallet} ticker={data.selectedTicker}  setAmount={onChangeAmount}/></div>
                     <div className="form-group"> 
                         <label>Total:<div onChange={onChangeAmount}>{data.amount}</div> </label>
                     </div>
