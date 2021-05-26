@@ -26,6 +26,7 @@ import { AuthContext } from '../App';
         //onSubmit = onSubmit.bind(this);
         var ex = JSON.parse(localStorage.getItem('exchanges'))
         console.log('local',ex, props)
+        console.log('TAB:',props.tab)
         var thisExchange = ex.filter(exchange => 
             props.exchange.name === exchange.name
         )
@@ -59,6 +60,7 @@ import { AuthContext } from '../App';
     console.log('B4UseEffect', data);    
 useEffect(() => {
     //setData(data);
+    
      console.log('DuringUseEffect', props, data)
 console.log(props.exchange.url)
       axios.get(props.exchange.url+'/tickers').then(result => {
@@ -192,13 +194,16 @@ function onSubmit(e) {
     // const mywallet = data.wallet.filter(account => 
     //     account.id === data.baseAsset
     // )
+
+
+
     let mywallet = wallet.wallet.filter(account => 
         account.id === data.baseAsset
     )   
        
        console.log('RETURN FORM', data)
 return (       
-            <div className="container" style={{marginTop: '10px', marginLeft:'2px', marginRight:'2px'}}>
+            <div className="container pl-0" style={{marginTop: '10px', marginLeft:'2px', marginRight:'2px'}}>
                 
                 <form className="form-row" style={{width:'100%'}} onSubmit={onSubmit}>
                     <div className="form-group col-sm-6"> 
@@ -217,7 +222,7 @@ return (
                     
                     </div>
 
-                    <Tabs defaultActiveKey="limit" id="controlled-tab-example" className="nav nav-pills nav-fill col-sm-12">
+                    <Tabs defaultActiveKey="limit" id="controlled-tab-example" className="col-sm-12">
                 <Tab eventKey="limit" title="Limit" className="col-sm-12">
                 
                    <div className="row pt-2"> 
@@ -249,9 +254,11 @@ return (
                 </div>
                     
                 </div>
-                </Tab >
+                </Tab>
                 <Tab eventKey="market" title="Market" className="">
-                <div className="form-group"> 
+                <div className="row pt-2">
+                <div className="col-sm-6"> 
+                <div className="form-group "> 
                         <label>Amount</label>
                         <input  type="text"
                                 className="form-control"
@@ -259,8 +266,20 @@ return (
                                 onChange={onChangeName}
                                 />
                 </div>
+                <div><Wallet wallet={mywallet}  setAmount={onChangeAmount}/></div>
+                    <div className="form-group"> 
+                        <label>Total:<div onChange={onChangeAmount}>{data.amount}</div> </label>
+                    </div>
+                </div>
+                <div className="col-sm-6">
+                    Depth
+                    <Depth onChangePrice={onChangePrice} clearTicker={clearTicker}  baseAsset={data.baseAsset}  exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
+                </div>
+                </div>
+                
                 </Tab>
                 </Tabs>
+                
                     <div className="form-group"> 
                         
                         <input  type="hidden"
@@ -291,7 +310,9 @@ return (
                     
 
                     <div className="form-group col-sm-12">
-                        <input type="submit" value="Place buy order" className="btn btn-primary" />
+                        { props.tab ==='buy' ? <input type="submit" value="Place buy order" className="btn btn-success" /> :
+                        <input type="submit" value="Place sell order" className="btn btn-danger" />
+                    }
                     </div>
                 </form>
             </div>

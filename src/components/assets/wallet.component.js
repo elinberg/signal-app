@@ -43,7 +43,7 @@ const percent100 = e => {
 }
 
     return (
-    <div className="container" style={{paddingLeft:'0px'}}>
+    <div className="" style={{paddingLeft:'0px'}}>
     <div className="row">
         <div onClick={percent25} className="col-sm-3"><small className="tiny">25%</small></div>
         <div onClick={percent50} className="col-sm-3"><small className="tiny">50%</small></div>

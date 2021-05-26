@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useHistory } from "react-router";
@@ -14,28 +14,56 @@ import {Tabs, Tab, Modal, Row, Button, Col, Form, Card, Container} from "react-b
  
 //import { AuthContext } from "../App";
 //App.use(cors());
- export const Exchange  = props => (
-    <div className="card" style={{float:'left', width: '28rem', marginRight:'10px'}}>
+ export const Exchange  = props => {
+    const [key, setKey] = useState('buy');
+    const onSelect = k => {
+        console.log('onSelect',k)
+        setKey(k)
+    }
+    useEffect(() => {
+        
+        console.log('TAB',this)
+        // dispatch({
+        //     type: SET_ALERT,
+        //     payload: msg
+        // })
+        }, []);
+    
+
+return (
+    
+    <div className="card" style={{float:'left', width: '29rem', marginRight:'10px'}}>
         <div style={{paddingLeft:'5px', paddingRight:'5px'}} className="card-body">
             <h5 className="card-title">{props.exchange.name} </h5>
-            <p className="card-text"></p>
             <Tabs defaultActiveKey="buy" 
-                id="controlled-tab-example" className="nav nav-pills nav-fill">
+                id="buy-sell-tab" onSelect={onSelect} className="nav nav-pills nav-fill">
                 <div className="tabPane" eventKey="buy" title="Buy" tabClassName="">
-                <ExchangeTradeFormBuy exchange={props.exchange} />
+                {/* <ExchangeTradeFormBuy exchange={props.exchange} /> */}
                 </div>
                 <div className="tabPane" eventKey="sell" title="Sell" tabClassName="">
-                <ExchangeTradeFormBuy exchange={props.exchange} /> 
+                {/* <ExchangeTradeFormBuy exchange={props.exchange} />  */}
                 </div>
             </Tabs>
-            
+            <ExchangeTradeFormBuy setTab={setKey} tab={key} exchange={props.exchange} /> 
+            {/* <div class="btn-group" style={{width:'100%'}} role="group" aria-label="Buy or Sell">
+                <button type="button" class="btn btn-primary btn-block btn-sm mt-0 active">Buy</button>
+                <button type="button" class="btn btn-secondary btn-block btn-sm mt-0">Sell</button>
+            </div> */}
+            {/* <div>
+                <div className="col-sm-12" eventKey="buy" title="Buy" tabClassName="">
+                <ExchangeTradeFormBuy exchange={props.exchange} />
+                </div>
+                <div className="col-sm-12" eventKey="sell" title="Sell" tabClassName="">
+                <ExchangeTradeFormBuy exchange={props.exchange} /> 
+                </div>
+            </div> */}
             
         </div>
     </div>
+    )
 
     
-    
-)
+}
 
 
 const ExchangeTradeList = () => {
