@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { findDOMNode } from "react-dom";
-import Helmet from 'react-helmet';
+
+
 
  class  Technicals extends Component {
 
