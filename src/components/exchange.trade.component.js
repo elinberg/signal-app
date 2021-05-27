@@ -5,10 +5,6 @@ import { useHistory } from "react-router";
 import {SET_ALERT_OVERWRITE} from './types';
 import { AuthContext } from "../App";
 import ExchangeTradeForm from "./exchange.tradeForm.component"
-import 'bootstrap/dist/css/bootstrap.min.css';
-import $ from 'jquery';
-import Popper from 'popper.js';
-import 'bootstrap/dist/js/bootstrap.bundle.min';
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
  export const Exchange  = props => {
