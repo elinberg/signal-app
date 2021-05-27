@@ -84,7 +84,7 @@ export const Login = () => {
                 })
                 dispatch({
                     type: SET_ALERT,
-                    payload: {  message:'Login Successful', alertType: 'success', timeout:5000}
+                    payload: {  message:'Login Successful', alertType: 'success', timeout:3000}
                 })
                 
                 history.push("/exchanges");
@@ -121,6 +121,7 @@ export const Login = () => {
                     <label>User Name: </label>
                     <input  type="text"
                             className="form-control"
+                            autoComplete="username"
                             value={data.username}
                             onChange={onChangeUsername}
                             />
@@ -131,6 +132,7 @@ export const Login = () => {
                             type="password" 
                             className="form-control"
                             value={data.password}
+                            autoComplete="current-password"
                             onChange={onChangePassword}
                             />
                 </div>

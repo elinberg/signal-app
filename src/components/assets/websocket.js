@@ -43,7 +43,7 @@ const obj = Object.create(protoMethods);
          console.log('WebSocket Client Connected');
          if(msg.length > 0 && props.exchange.name == 'Bitmart'){
             this.send(msg);
-        }
+         }
         // let iid2 = setInterval(() =>{
         //     //console.log('READYSTATE1',client['Bitmart'].readyState)
         //     if(props.exchange.name == 'Bitmart'){

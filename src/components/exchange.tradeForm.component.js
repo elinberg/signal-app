@@ -5,29 +5,25 @@ import Spot from "./assets/spot.component";
 import Depth from "./assets/depth.component";
 import Technicals from "./assets/technicals.component";
 import Wallet from "./assets/wallet.component";
-//import Kline from "./assets/kline.component";
 import {Tabs, Tab, Modal, Row, Button, Col, Form, Card, Container} from "react-bootstrap";
-import { w3cwebsocket as W3CWebSocket } from "websocket";
-//const {unzip} = require("./zlib.min")
-//const zlib = require("zlib")
-import zlib from "zlib"
+import {SET_ALERT_OVERWRITE, SET_ALERT} from './types';
 import { AuthContext } from '../App';
 
 
 
 
- const  ExchangeTradeFormBuy = (props) => {
-
+ const  ExchangeTradeForm = (props) => {
+    const [orderType, setOrderType] = useState('limit');
+    
+    const onSelect = k => {
+        console.log('onSelect',k)
+        setOrderType(k)
+    }
         const { state, dispatch } = React.useContext(AuthContext);
-        
-        //const spotref=useRef();
-        //onChangeTicker = onChangeTicker.bind(this);
-        
-        //onSubmit = onSubmit.bind(this);
         var ex = JSON.parse(localStorage.getItem('exchanges'))
-        console.log('local',ex, props)
-        console.log('TAB:',props.tab)
-        
+
+        //console.log('TAB:',props.tab)
+        var prevTab = props.tab;
         var thisExchange = ex.filter(exchange => 
             props.exchange.name === exchange.name
         )
@@ -54,16 +50,38 @@ import { AuthContext } from '../App';
             secret: thisExchange.length > 0 ? thisExchange[0].secret: ''
         }
 
-        const [data, setData]= useState(initalState);
-        const [wallet, setWallet]= useState({wallet:[]});
-        console.log('exchange',props.exchange);
+const [data, setData]= useState(initalState);
+const [wallet, setWallet]= useState({wallet:[]});
         
-    console.log('B4UseEffect', data);    
+           
+  
 useEffect(() => {
-    //setData(data);
-    onChangeTab = onChangeTab.bind(props.onTabSelect);
-     console.log('DuringUseEffect', props, data)
-console.log(props.exchange.url)
+    if(data.price.length > 0 || data.qty.length > 0 || data.amount.length > 0 ){
+        setData(
+            {...data,
+            price:'',
+            amount: '',
+            qty: ''}
+        )
+    }
+
+}, [props.tab]); 
+
+useEffect(() => {
+    if(data.price.length > 0 || data.qty.length > 0 || data.amount.length > 0 ){
+        setData(
+            {...data,
+            price:'',
+            amount: '',
+            qty: ''}
+        )
+    }
+
+}, [orderType]);
+
+useEffect(() => {
+
+
       axios.get(props.exchange.url+'/tickers').then(result => {
             
         result.data.tickers.map((ticker,i) => {
@@ -80,6 +98,7 @@ console.log(props.exchange.url)
 
         });
         //if(props.exchange.name == 'Bitmart'){
+            
             console.log('URL',props.exchange.url)
             axios.get(props.exchange.url+'/accounts', {
                 headers: {
@@ -99,16 +118,13 @@ console.log(props.exchange.url)
         //}
       return () => {
           //setData({})
+          console.log('LEAVING')
       };
 }, []);  
 
-  let onChangeTab = e => {
-      console.log('Tab Event');
-  }
 
  const onFocusTicker = e => {
 
-     console.log("FOCUS", this);
      setData({
             ...data,
             prevSelectedTicker: data.selectedTicker ? data.selectedTicker : "",
@@ -127,20 +143,24 @@ const onChangeTicker = e => {
     //    
 console.log('OnChangeTicker', e)
     
-    let asset;
+    let asset, sellAsset;
     //   setData({
         //       name: e.target.value
         //   });
         //console.log('MYWALLET',mywallet)
         if(props.tab == 'buy'){
             asset = e.value.replace(/.*_/g,"");
+            sellAsset = e.value.replace(/_.*/g,"");
         } else {
             asset = e.value.replace(/_.*/g,"");
+            sellAsset = e.value.replace(/.*_/g,"");
+            
         }
         setData({
             ...data,
             selectedTicker: e.value ? e.value : "",
-            baseAsset: e.value !== undefined ? asset : ''
+            baseAsset: e.value !== undefined ? asset : '',
+            sellAsset: sellAsset
           });
           //data.wallet.filter( account => account.id === e.value.replace(/.*_/g,"") )
        // console.log('FILTERED WALLET',data.wallet, e.value.replace(/.*_/g,""));
@@ -157,12 +177,45 @@ const onChangeName = e => {
         });
         
 }
+const tabEvent = e => {
+    console.log('TABEVENT',e)
+}
+const clearAmount = e => {
+    setData(
+        {...data,
+        price:'',
+        amount: '',
+        qty: ''}
+    )
+}
 const onChangeAmount = e => {
-    console.log(e.target.value,data.amount, parseFloat(e.target.value),parseFloat(data.amount))
-    let qty = Math.round(parseFloat(e.target.value) / parseFloat(data.price));
+    let qty, amount;
+    if(data.price.length < 1 && orderType == 'limit'){
+        dispatch({
+            type: SET_ALERT,
+            payload: {  message:'Please Choose a price before setting qty', alertType: 'success', timeout:3000}
+        })
+        return;
+    }
+
+    if(props.tab == 'buy' && orderType == 'limit'){
+         qty = Math.round(parseFloat(e.target.value) / parseFloat(data.price));
+         amount = parseFloat(e.target.value).toFixed(2);
+    } else if(props.tab == 'sell' && orderType == 'limit') {
+        qty = e.target.value ;
+        amount = Math.round(parseFloat(e.target.value) * parseFloat(data.price));
+        amount = amount.toFixed(2)
+    } else if(props.tab == 'buy' && orderType == 'market') {
+        amount = parseFloat(e.target.value).toFixed(2);
+        qty = '';
+    } else if(props.tab == 'sell' && orderType == 'market'){
+        amount = parseFloat(e.target.value).toFixed(2);
+        qty='';
+    }
+
     setData({
         ...data,
-        amount: e.target.value,
+        amount: amount,
         qty: qty
     });
     
@@ -182,25 +235,20 @@ const onChangeQty = e => {
     });  
 }
 
- 
+
 
 function onSubmit(e) {
 
     e.preventDefault();
     
-    console.log(`Form submitted:`, data.name);;
+    console.log(`Form submitted:`, data.name);
 
-    // const data = ex.filter(exchange => 
-    //     data.name !== exchange.name
-    // )
+    
 
-    // data.push({ name: data.name, secret: data.secret, apiKey:data.apiKey})
-    // localStorage.setItem('exchanges', JSON.stringify(data));
-    // props.hideModal();
-    //console.log(props)
+
 }
-     
-       
+
+
        console.log('RETURN FORM', data, props)
 return (       
             <div className="container pl-0" style={{marginTop: '10px', marginLeft:'2px', marginRight:'2px'}}>
@@ -222,7 +270,7 @@ return (
                     
                     </div>
 
-                    <Tabs defaultActiveKey="limit" id="controlled-tab-example" className="col-sm-12">
+                    <Tabs onSelect={onSelect} defaultActiveKey="limit" id="controlled-tab-example" className="col-sm-12">
                 <Tab eventKey="limit" title="Limit" className="col-sm-12">
                 
                    <div className="row pt-2"> 
@@ -230,6 +278,7 @@ return (
                     <div className="form-group"> 
                         <label>Price</label>
                         <input  type="text"
+                                placeHolder="Price"
                                 className="form-control"
                                 value={data.price}
                                 onChange={onChangePrice}
@@ -238,14 +287,15 @@ return (
                     <div className="form-group"> 
                         <label>Qty</label>
                         <input  type="text"
+                                placeHolder="Quantity"
                                 className="form-control"
                                 value={data.qty}
                                 onChange={onChangeQty}
                                 />
                     </div>
-                    <Wallet tab={props.tab} wallet={wallet.wallet} ticker={data.selectedTicker} setAmount={onChangeAmount}/>
+                    <Wallet tab={props.tab} clearAmount={clearAmount} wallet={wallet.wallet} ticker={data.selectedTicker} setAmount={onChangeAmount}/>
                     <div className="form-group"> 
-                        <label>Total:<div onChange={onChangeAmount}>{data.amount}</div> </label>
+                        <label>Total:</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
                 </div>
                 <div className="col-sm-6">
@@ -255,20 +305,31 @@ return (
                     
                 </div>
                 </Tab>
-                <Tab eventKey="market" title="Market" className="">
+                <Tab eventKey="market" title="Market" className="col-sm-12">
                 <div className="row pt-2">
                 <div className="col-sm-6"> 
                 <div className="form-group "> 
-                        <label>Amount</label>
+                        <label>Price</label>
                         <input  type="text"
+                                disabled="disabled"
+                                placeHolder="Optimal Market Price"
                                 className="form-control"
-                                value={data.name}
-                                onChange={onChangeName}
+                                value="Optimal Market Price"
+                                
                                 />
                 </div>
-                <div><Wallet tab={props.tab} wallet={wallet.wallet} ticker={data.selectedTicker}  setAmount={onChangeAmount}/></div>
+                <div className="form-group "> 
+                        <label>Total</label>
+                        <input  type="text"
+                                placeHolder={ props.tab == 'buy' ? 'Total '+data.baseAsset : 'Total '+data.sellAsset}
+                                className="form-control"
+                                value={data.amount}
+                                onChange={onChangeQty}
+                                />
+                </div>
+                <div><Wallet clearAmount={clearAmount} tab={props.tab} wallet={wallet.wallet} ticker={data.selectedTicker}  setAmount={onChangeAmount}/></div>
                     <div className="form-group"> 
-                        <label>Total:<div onChange={onChangeAmount}>{data.amount}</div> </label>
+                        <label>Total:</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
                 </div>
                 <div className="col-sm-6">
@@ -279,36 +340,7 @@ return (
                 
                 </Tab>
                 </Tabs>
-                
-                    <div className="form-group"> 
-                        
-                        <input  type="hidden"
-                                className="form-control"
-                                value={data.name}
-                                onChange={onChangeName}
-                                />
-                    </div>
                     
-                    <div className="form-group">
-                       
-                        <input 
-                                type="hidden" 
-                                className="form-control"
-                                value={data.apiKey}
-                                
-                                />
-                    </div>
-                    <div className="form-group">
-                        {/* <label>Secret: </label> */}
-                        <input 
-                                type="hidden" 
-                                className="form-control"
-                                value={data.secret}
-                                
-                                />
-                    </div>
-                    
-
                     <div className="form-group col-sm-12">
                         { props.tab ==='buy' ? <input type="submit" value="Place buy order" className="btn btn-success" /> :
                         <input type="submit" value="Place sell order" className="btn btn-danger" />
@@ -319,4 +351,4 @@ return (
         )
     
 }
-export default ExchangeTradeFormBuy;
+export default ExchangeTradeForm;

@@ -63,7 +63,7 @@ export const Sidebar = () => {
             </div>
           </nav>)}
           
-          <main role="main"  className="col-md-9 ml-sm-auto col-lg-10 px-4">
+          <main role="main" style={{margingLeft:'unset'}}  className="col-md-9 ml-sm-auto col-lg-10 px-4">
           
           
           <Route path="/dashboard" exact component={Dashboard} />

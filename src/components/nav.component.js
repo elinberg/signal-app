@@ -21,7 +21,7 @@ export const Nav = () => {
     })
     dispatch({
         type: SET_ALERT_OVERWRITE,
-        payload: {  message:'Logout Successful', alertType: 'success', timeout:5000}
+        payload: {  message:'Logout Successful', alertType: 'success', timeout:3000}
     })
     history.push("/login");
  }

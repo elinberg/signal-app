@@ -4,30 +4,30 @@ import axios from 'axios';
 import { useHistory } from "react-router";
 import {SET_ALERT_OVERWRITE} from './types';
 import { AuthContext } from "../App";
-import ExchangeTradeFormBuy from "./exchange.tradeFormBuy.component"
-import ExchangeTradeFormSell from "./exchange.tradeFormSell.component"
-
-//import Modal from "react-bootstrap/Modal";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { combineReducers } from 'redux';
-import {Tabs, Tab, Modal, Row, Button, Col, Form, Card, Container} from "react-bootstrap";
- 
-//import { AuthContext } from "../App";
-//App.use(cors());
+import ExchangeTradeForm from "./exchange.tradeForm.component"
+import 'bootstrap/dist/css/bootstrap.min.css';
+import $ from 'jquery';
+import Popper from 'popper.js';
+import 'bootstrap/dist/js/bootstrap.bundle.min';
+import Tabs from "react-bootstrap/Tabs";
+import Tab from "react-bootstrap/Tab";
  export const Exchange  = props => {
-    const [key, setKey] = useState('buy');
-    const onSelect = k => {
-        console.log('onSelect',k)
-        setKey(k)
+const [key, setKey] = useState('buy');
+const [prev, setPrev] = useState('sell');
+const onSelect = k => {
+    console.log('onSelect',k)
+    if(k == 'buy'){
+        setPrev('sell')
+    } else {
+        setPrev('buy')
     }
-    useEffect(() => {
-        
-        //console.log('TAB',this)
-        // dispatch({
-        //     type: SET_ALERT,
-        //     payload: msg
-        // })
-        }, []);
+    setKey(k)
+}
+
+useEffect(() => {
+
+
+}, []);
     
 
 return (
@@ -36,15 +36,15 @@ return (
         <div style={{paddingLeft:'5px', paddingRight:'5px'}} className="card-body">
             <h5 className="card-title">{props.exchange.name} </h5>
             <Tabs defaultActiveKey="buy" 
-                id="buy-sell-tab" onSelect={onSelect} className="nav nav-pills nav-fill">
-                <div className="tabPane" eventKey="buy" title="Buy" tabClassName="">
-                {/* <ExchangeTradeFormBuy exchange={props.exchange} /> */}
-                </div>
-                <div className="tabPane" eventKey="sell" title="Sell" tabClassName="">
-                {/* <ExchangeTradeFormBuy exchange={props.exchange} />  */}
-                </div>
+                id={'buy-sell-tab-'+props.exchange.name}  onSelect={onSelect} className="nav nav-pills nav-fill">
+                <Tab className="tab" data-toggle="tab" eventKey="buy" title="Buy" tabClassName="">
+                {/* <ExchangeTradeForm exchange={props.exchange} /> */}
+                </Tab>
+                <Tab className="tab" data-toggle="tab" eventKey="sell" title="Sell" tabClassName="">
+                {/* <ExchangeTradeForm exchange={props.exchange} />  */}
+                </Tab>
             </Tabs>
-            <ExchangeTradeFormBuy onTabSelect={onSelect} setTab={setKey} tab={key} exchange={props.exchange} /> 
+            <ExchangeTradeForm onTabSelect={onSelect} prev={prev} setTab={setKey} tab={key} exchange={props.exchange} /> 
             {/* <div class="btn-group" style={{width:'100%'}} role="group" aria-label="Buy or Sell">
                 <button type="button" class="btn btn-primary btn-block btn-sm mt-0 active">Buy</button>
                 <button type="button" class="btn btn-secondary btn-block btn-sm mt-0">Sell</button>

@@ -5,16 +5,21 @@ import React from 'react';
      let currency = '';
      let frozen = '';
      let asset, wallet;
+     if( props.wallet == undefined ){
+         return;
+     }
 
      if(props.tab == 'buy'){
+        
         asset = props.ticker !== undefined ? props.ticker.replace(/.*_/g,"") : '';
     } else {
+        
         asset =  props.ticker !== undefined ? props.ticker.replace(/_.*/g,""): '';
     }
      wallet = props.wallet.filter(account => 
         account.id === asset
     ) 
-     console.log('WALLET TAG', props)
+     console.log('WALLET TAG', wallet,asset)
      if(wallet.length > 0 ){
         avail = wallet[0].available;
         frozen = wallet[0].frozen;
@@ -30,7 +35,7 @@ import React from 'react';
     }
 
     const percent50 = e => {
-        console.log('PERCENT25')
+        console.log('PERCENT50')
         if(avail.length>0){
        
        props.setAmount({target:{value:.50 * Math.round(avail)}})
@@ -38,7 +43,7 @@ import React from 'react';
    }
 
    const percent75 = e => {
-    console.log('PERCENT25')
+    console.log('PERCENT75')
     if(avail.length>0){
    
    props.setAmount({target:{value:.75 * Math.round(avail)}})
@@ -46,10 +51,10 @@ import React from 'react';
 }
 
 const percent100 = e => {
-    console.log('PERCENT25')
+    console.log('PERCENT100', avail)
     if(avail.length>0){
    
-   props.setAmount({target:{value:Math.round(avail)}})
+        props.setAmount({target:{value:Math.round(avail)}})
     }
 }
 

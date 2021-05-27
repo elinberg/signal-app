@@ -189,9 +189,9 @@ const thisExchange = ex.filter(exchange =>
             //send unsubscrube message here
             //client.send(msg)
             if(client['Bitmart']){
-                console.log(client['Bitmart'])
+                client['Bitmart'].send(msg)
                 clearInterval(intervalId)
-            client['Bitmart'].close();
+                client['Bitmart'].close();
             }
             if(client['Binance']){
                 client['Binance'].close();
