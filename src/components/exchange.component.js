@@ -9,6 +9,7 @@ export default class ExchangeForm extends Component {
 
         this.onChangeName = this.onChangeName.bind(this);
         this.onChangeApiKey = this.onChangeApiKey.bind(this);
+        this.onChangeApiName = this.onChangeApiName.bind(this);
         this.onChangeSecret = this.onChangeSecret.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.ex = JSON.parse(localStorage.getItem('exchanges'))
@@ -21,12 +22,14 @@ export default class ExchangeForm extends Component {
             this.thisExchange = [{ 
                 name: props.exchange.name,
                 apiKey: '',
+                apiName: '',
                 secret: '',}];        
         }
 
         this.state = {
             name: props.exchange.name,
             apiKey: this.thisExchange.length > 0 ? this.thisExchange[0].apiKey: '',
+            apiName: this.thisExchange.length > 0 ? this.thisExchange[0].apiName: '',
             url: props.exchange.url,
             secret: this.thisExchange.length > 0 ? this.thisExchange[0].secret: '',
         }
@@ -45,6 +48,11 @@ export default class ExchangeForm extends Component {
     onChangeApiKey(e) {
         this.setState({
             apiKey: e.target.value
+        });
+    }
+    onChangeApiName(e) {
+        this.setState({
+            apiName: e.target.value
         });
     }
 
@@ -69,7 +77,7 @@ export default class ExchangeForm extends Component {
             this.state.name !== exchange.name
         )
 
-        data.push({ name: this.state.name, secret: this.state.secret, apiKey:this.state.apiKey})
+        data.push({ name: this.state.name, secret: this.state.secret, apiKey:this.state.apiKey, apiName:this.state.apiName})
         localStorage.setItem('exchanges', JSON.stringify(data));
         this.props.hideModal();
         //console.log(this.props)
@@ -98,6 +106,15 @@ export default class ExchangeForm extends Component {
                                 value={this.state.url}
                                 onChange={this.onChangeUrl}
                                 
+                                />
+                    </div>
+                    <div className="form-group">
+                        <label>API Name: </label>
+                        <input 
+                                type="text" 
+                                className="form-control"
+                                value={this.state.apiName}
+                                onChange={this.onChangeApiName}
                                 />
                     </div>
                     <div className="form-group">

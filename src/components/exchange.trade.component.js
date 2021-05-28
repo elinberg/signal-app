@@ -29,6 +29,7 @@ useEffect(() => {
 return (
     
     <div className="card" style={{float:'left', width: '29rem', marginRight:'10px'}}>
+        
         <div style={{paddingLeft:'5px', paddingRight:'5px'}} className="card-body">
             <h5 className="card-title">{props.exchange.name} </h5>
             <Tabs defaultActiveKey="buy" 
@@ -62,9 +63,9 @@ return (
 }
 
 
-const ExchangeTradeList = () => {
+const ExchangeTradeList = props => {
 
- //   const { dispatch } = React.useContext(AuthContext);
+    //const { data, setData } = React.useContext(AuthContext);
 
     const initialState = {
         exchange: [],
@@ -75,34 +76,37 @@ const ExchangeTradeList = () => {
     
       let history = useHistory();
 
-
-
+// if(props.exchange === undefined){
+//     return null;
+// }
+console.log('ExchangeTradeList', data)
     //useEffect(() => {
-       useEffect(() => {
+        useEffect(() => {
            
-        axios.get('/api/exchange/')
-            .then(response => {
-                //this.setState({ asset: response.data });
-                console.log('GET EX',response.data, data)
+         axios.get('/api/exchange/')
+             .then(response => {
+                 //this.setState({ asset: response.data });
+                 console.log('GET EX',response.data, data)
                 setData({
                     ...data,
                     exchange: response.data,
                     showModal: 'none'
                   });
-            })
-            .catch(function (error){
-                console.log(error);
-            })
+             })
+             .catch(function (error){
+                 console.log(error);
+             })
 
             return () => {
-                setData({})
-            }
+                 setData({})
+             }
 
-        }, []);
-    console.log('isData', data)
+         }, []);
+    //console.log('isData', data)
     const [isOpen, setIsOpen] = React.useState(false);
     //const [hideModal, setHideModal] = React.useState({});
     const [exchange, setExchange] = React.useState({});
+    //const [exchange, setExchange] = React.useState(props.exchange);
     const [title, setTitle] = React.useState("Transitioning...");
     const [url, setUrl] = React.useState("");
     //const [time, setTime] = React.useState("");
@@ -111,7 +115,7 @@ const ExchangeTradeList = () => {
         //document.getElementById('exchangeModal').setAttribute('show', true);
         setIsOpen(true);
         setTitle(props.exchange.name);
-        setExchange(props.exchange)
+       // setExchange(props.exchange)
         //setUrl(props.exchange.url)
         //setHideModal(hideModal);
  
@@ -161,7 +165,7 @@ const ExchangeTradeList = () => {
             //     //currentExchange.serverTime = response.serverTime;
                 
             //   });
-              console.log('FFFF',data)
+              //console.log('FFFF',props)
             
               return <Exchange title={currentExchange.name} hideModal={hideModal} setUrl={setUrl} setTitle={setTitle} showModal={showModal} setIsOpen={setIsOpen} exchange={currentExchange} key={i} />;
             

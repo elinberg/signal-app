@@ -13,6 +13,7 @@ import { combineReducers } from 'redux';
  const Exchange  = props => (
     
     <div className="card" style={{float:'left', width: '14rem', marginRight:'10px', height:'204px'}}>
+ 
         <div className="card-body">
             <h5 className="card-title">{props.exchange.name} </h5>
             <p className="card-text"></p>

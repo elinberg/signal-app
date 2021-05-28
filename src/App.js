@@ -16,9 +16,35 @@ const initialState = {
   username: null,
   token: null,
   message: null,
-  alerts: []
+  alerts: [],
+  onTabSelect: {},
+  prev: '',
+  setTab:{},
+  tab: '',
+  selectedTicker:'',
+  exchange: []
 };
-
+export const  initalData = {
+  onTabSelect: {},
+  prev: '',
+  setTab:{},
+  tab: '',
+  selectedTicker:'',
+  exchange: [],
+  name: '',
+  apiKey:  '',
+  secret:  '',
+  url: '',
+  asks:[],
+  bids:[],
+  prevSelectedTicker: '',
+  tickerEndpoint: '',
+  secret: '',
+  price:'',
+  qty:'',
+  amount:'',
+  wallet:[]
+} ;
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -67,13 +93,6 @@ const reducer = (state, action) => {
           message: '',
           alerts:state.alerts.filter(alert => alert.id !== action.payload)
         };
-    case 'START_SPOT':
-        //console.log('Remove Alert',action.payload, state)
-        
-        return {
-          ...state,
-          ticker: action.payload.ticker
-        };
     case LOGOUT:
       //localStorage.clear();
       localStorage.setItem('token', '')
@@ -103,6 +122,8 @@ const reducer = (state, action) => {
     //console.log('Store State',this.props.store.getState())
     const [state, dispatch] = React.useReducer(reducer, initialState);
 
+    const [data, setData] = React.useState(initalData);
+    
 
  
 
@@ -114,7 +135,9 @@ const reducer = (state, action) => {
       <AuthContext.Provider
       value={{
         state,
-        dispatch
+        dispatch,
+        data,
+        setData
       }}
     >
       

@@ -1,4 +1,4 @@
-import React, { Component , useRef, useState, useEffect} from 'react';
+import React, { Component , createContext, useState, useEffect} from 'react';
 import axios from 'axios';
 import TickerSelect from "./assets/ticker.select.component";
 import Spot from "./assets/spot.component";
@@ -8,11 +8,13 @@ import Wallet from "./assets/wallet.component";
 import {Tabs, Tab, Modal, Row, Button, Col, Form, Card, Container} from "react-bootstrap";
 import {SET_ALERT_OVERWRITE, SET_ALERT} from './types';
 import { AuthContext } from '../App';
-
-
+import Trade from "./assets/trade.component"
 
 
  const  ExchangeTradeForm = (props) => {
+// onTabSelect={onSelect} prev={prev} setTab={setKey} tab={key} exchange={props.exchange}
+    
+
     const [orderType, setOrderType] = useState('limit');
     
     const onSelect = k => {
@@ -20,6 +22,7 @@ import { AuthContext } from '../App';
         setOrderType(k)
     }
         const { state, dispatch } = React.useContext(AuthContext);
+        //const { state, dispatch, data, setData } = React.useContext(AuthContext);
         var ex = JSON.parse(localStorage.getItem('exchanges'))
 
         //console.log('TAB:',props.tab)
@@ -50,12 +53,14 @@ import { AuthContext } from '../App';
             secret: thisExchange.length > 0 ? thisExchange[0].secret: ''
         }
 
-const [data, setData]= useState(initalState);
-const [wallet, setWallet]= useState({wallet:[]});
+
         
-           
-  
+const [data, setData]= useState(initalState);          
+const [wallet, setWallet]= useState({wallet:[]});
 useEffect(() => {
+
+    
+    
     if(data.price.length > 0 || data.qty.length > 0 || data.amount.length > 0 ){
         setData(
             {...data,
@@ -251,6 +256,7 @@ function onSubmit(e) {
 
        console.log('RETURN FORM', data, props)
 return (       
+    
             <div className="container pl-0" style={{marginTop: '10px', marginLeft:'2px', marginRight:'2px'}}>
                 
                 <form className="form-row" style={{width:'100%'}} onSubmit={onSubmit}>
@@ -278,7 +284,7 @@ return (
                     <div className="form-group"> 
                         <label>Price</label>
                         <input  type="text"
-                                placeHolder="Price"
+                                placeholder="Price"
                                 className="form-control"
                                 value={data.price}
                                 onChange={onChangePrice}
@@ -287,7 +293,7 @@ return (
                     <div className="form-group"> 
                         <label>Qty</label>
                         <input  type="text"
-                                placeHolder="Quantity"
+                                placeholder="Quantity"
                                 className="form-control"
                                 value={data.qty}
                                 onChange={onChangeQty}
@@ -312,7 +318,7 @@ return (
                         <label>Price</label>
                         <input  type="text"
                                 disabled="disabled"
-                                placeHolder="Optimal Market Price"
+                                placeholder="Optimal Market Price"
                                 className="form-control"
                                 value="Optimal Market Price"
                                 
@@ -321,7 +327,7 @@ return (
                 <div className="form-group "> 
                         <label>Total</label>
                         <input  type="text"
-                                placeHolder={ props.tab == 'buy' ? 'Total '+data.baseAsset : 'Total '+data.sellAsset}
+                                placeholder={ props.tab == 'buy' ? 'Total '+data.baseAsset : 'Total '+data.sellAsset}
                                 className="form-control"
                                 value={data.amount}
                                 onChange={onChangeQty}
@@ -347,7 +353,11 @@ return (
                     }
                     </div>
                 </form>
+            <div className="d-flex justify-content-between flex-wrap  align-items-center pb-2 mb-3 border-bottom">
+                <Trade exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
             </div>
+            </div>
+        
         )
     
 }
