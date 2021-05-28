@@ -3,7 +3,6 @@ import { useHistory } from "react-router";
 import { AuthContext } from '../../App';
 //import TradeFormContext from "../tradeFormContext"
 import TradeWebSocketConnection from './trade.websocket';
-import CryptoJS from 'crypto-js';
 const _transform = require('./transformer')
 
 const Trade = props => {
