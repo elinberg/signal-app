@@ -155,14 +155,14 @@ const thisExchange = ex.filter(exchange =>
             
             <div className="container" style={{marginTop: '2px', marginBottom: '2px', paddingLeft:'0px'}}>
                 
-                <ul style={{listStyleType:'none', paddingLeft:'0px'}}>
+                <ul className="pt-1" style={{listStyleType:'none', paddingLeft:'0px'}}>
                 {data.asks.map((value, index) => {
-                            return <li key={index} style={{whiteSpace:'nowrap'}}><small onClick={onPriceClick} className="text-danger" >{value[0]}</small> <small className="" >{value[1]}</small></li>
+                            return <li className="tiny" key={index} style={{whiteSpace:'nowrap'}}><small onClick={onPriceClick} className="text-danger" >{value[0]}</small> <small className="" >{value[1]}</small></li>
                 })}
                 </ul>
                 <ul style={{listStyleType:'none', paddingLeft:'0px'}}>
                 {data.bids.map((value, index) => {
-                            return <li key={index} style={{whiteSpace:'nowrap'}}><small onClick={onPriceClick} className="text-success">{value[0]}</small> <small className="" >{value[1]}</small></li>
+                            return <li className="tiny" key={index} style={{whiteSpace:'nowrap'}}><small onClick={onPriceClick} className="tiny text-success">{value[0]}</small> <small className="" >{value[1]}</small></li>
                 })}
                 </ul>
                 

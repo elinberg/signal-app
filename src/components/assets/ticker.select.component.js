@@ -4,7 +4,7 @@ import Select, {components} from "react-select";
 //var opts = [{ value: 'SHIB_USDT', label: 'SHIB_USDT' }]
 //props.options
  const TickerSelect = props => (
-    <Select style={props.style} options={props.options} onFocus={props.onFocus} onChange={props.onChange} />
+    <Select classNamePrefix="react-select" className="react-select-container" options={props.options} onFocus={props.onFocus} onChange={props.onChange} />
 )
 
 export default TickerSelect;

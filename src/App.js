@@ -13,6 +13,7 @@ export const AuthContext = React.createContext();
 
 const initialState = {
   isAuthenticated: false,
+  isOpen: false,
   username: null,
   token: null,
   message: null,
@@ -27,6 +28,7 @@ const initialState = {
 export const  initalData = {
   onTabSelect: {},
   prev: '',
+  isOpen: false,
   setTab:{},
   tab: '',
   selectedTicker:'',
@@ -59,8 +61,16 @@ const reducer = (state, action) => {
       return {
         ...state,
         isAuthenticated: true,
+        isOpen: false,
         username: action.payload.username,
         token: action.payload.token
+      };
+      case 'MENU_STATE':
+      console.log('RCVD MENU STATE',action.payload, state)
+       
+      return {
+        ...state,
+        isOpen:false
       };
       case SET_ALERT:
       //console.log('Message',action.payload)

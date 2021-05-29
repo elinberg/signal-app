@@ -61,14 +61,14 @@ const percent100 = e => {
     return (
     <div className="" style={{paddingLeft:'0px'}}>
     <div className="row">
-        <div onClick={percent25} className="col-sm-3"><small className="tiny">25%</small></div>
-        <div onClick={percent50} className="col-sm-3"><small className="tiny">50%</small></div>
-        <div onClick={percent75} className="col-sm-3"><small className="tiny">75%</small></div>
-        <div onClick={percent100} className="col-sm-3"><small className="tiny">100%</small></div>
+        <div onClick={percent25} className="col-sm-3 tiny"><small>25%</small></div>
+        <div onClick={percent50} className="col-sm-3 tiny"><small className="">50%</small></div>
+        <div onClick={percent75} className="col-sm-3 tiny"><small className="">75%</small></div>
+        <div onClick={percent100} className="col-sm-3 tiny"><small className="">100%</small></div>
     </div>
      <div className="row">    
-        <div style={{whiteSpace:'nowrap'}} className="col-sm-12"><small className="tiny">Avail. {avail} {currency}</small></div> 
-        <div style={{whiteSpace:'nowrap'}} className="col-sm-12"><small className="tiny">In Orders {frozen} </small></div> 
+        <div style={{whiteSpace:'nowrap'}} className="col-sm-12 pt-2 tiny"><small className="">Avail. {avail} {currency}</small></div> 
+        <div style={{whiteSpace:'nowrap'}} className="col-sm-12  tiny"><small className="">In Orders {frozen} </small></div> 
     </div>
     </div>
     )

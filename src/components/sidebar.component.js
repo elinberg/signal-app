@@ -14,10 +14,11 @@ import CreateAsset from "./create-asset.component";
 import Register from "./register.component";
 import Dashboard from "./dashboard.component";
 import Exchanges from "./exchanges.component";
+import Menu from "./menu.component";
 
-export const Sidebar = () => {
+export const Sidebar = props => {
 
-    const { state, dispatch } = React.useContext(AuthContext);
+    const { state, data, setData, dispatch } = React.useContext(AuthContext);
     let location = useLocation();
     //console.log(location.pathname);
     //const { state, dispatch } = React.useContext(AuthContext);
@@ -36,37 +37,75 @@ export const Sidebar = () => {
 //       })
 //       history.push("/login");
 //    }
+
+
+
+var styles = {
+  width:'196px',
+  bmBurgerButton: {
+    position: 'fixed',
+    width: '36px',
+    height: '30px',
+    left: '14px',
+    top: '72px'
+  },
+  bmBurgerBars: {
+    background: '#373a47'
+  },
+  bmBurgerBarsHover: {
+    background: '#a90000'
+  },
+  bmCrossButton: {
+    height: '24px',
+    width: '24px'
+  },
+  bmCross: {
+    background: '#bdc3c7'
+  },
+  bmMenuWrap: {
+    position: 'fixed',
+    height: '100%',
+    minWidth:'230px'
+  },
+  bmMenu: {
+    background: '#373a47',
+    padding: '2.5em 1.5em 0',
+    fontSize: '1.15em'
+  },
+  bmMorphShape: {
+    fill: '#373a47'
+  },
+  bmItemList: {
+    color: '#b8b7ad',
+    padding: '0.8em'
+  },
+  bmItem: {
+    display: 'inline-block'
+  },
+  bmOverlay: {
+    background: 'rgba(0, 0, 0, 0.3)'
+  }
+}
+
+var isOpen = open => {
+  if(open === undefined){
+    return false;
+  }
+  return open;
+}
+var isMenuOpen = function(state) {
+  console.log('SIDEBAR MENU STATE',state)
+  return state;
+};
+
     return (
-        <div className="container-fluid">
-        <div className="row"> 
-          { state.isAuthenticated  && location.pathname !== '/register' && (<nav className="col-md-2 d-none d-md-block eggplant sidebar">
-            <div className="sidebar-sticky">
-              <ul className="nav flex-column">
-                
-                {state.isAuthenticated && ( <li className="nav-item">
-                  <Link to="/dashboard" className="nav-link">Dashboard</Link>
-                </li>)}
-                {state.isAuthenticated && ( <li className="navbar-item">
-                  <Link to="/exchanges" className="nav-link">Exchanges</Link>
-                </li>)}
-                {state.isAuthenticated && ( <li className="navbar-item">
-                  <Link to="/asset" className="nav-link">Assets</Link>
-                </li>)}
-                {state.isAuthenticated && ( <li className="navbar-item">
-                  <Link to="/create" className="nav-link">Create Asset</Link>
-                </li>)}
-                {state.isAuthenticated && ( <li className="navbar-item">
-                  <Link to="/edit" className="nav-link">Edit Asset</Link>
-                </li>)}
-                
-              </ul>
-            </div>
-          </nav>)}
-          
-          <main role="main" style={{margingLeft:'unset'}}  className="col-md-9 ml-sm-auto col-lg-10 px-4">
-          
-          
-          <Route path="/dashboard" exact component={Dashboard} />
+        <div id="outer-container" className="container-fluid">
+        <div  className="row"> 
+        
+          { state.isAuthenticated  && location.pathname !== '/register' && (
+          <Menu pageWrapId={ "main" } outerContainerId={ "outer-container" } styles={styles}  onStateChange={isMenuOpen}  isOpen={data.isOpen }  isAuthenticated={state.isAuthenticated} />)}
+          <main id="main"  role="main" style={{marginLeft:'unset'}}  className="col-md-12 ml-sm-auto col-lg-12 mt-3 px-0">
+          <Route path="/dashboard" exact render={ () => <Dashboard isOpen={isOpen} />} />
           <Route path="/asset" exact component={AssetList} />
           <Route path="/exchanges" exact component={Exchanges} />
           <Route path="/edit" component={EditAsset} />

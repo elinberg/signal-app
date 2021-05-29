@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorker from './serviceWorker';
+import './fonts/DIN/DINRegular/DINRegular.ttf';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

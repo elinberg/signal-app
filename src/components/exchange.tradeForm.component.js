@@ -254,14 +254,14 @@ function onSubmit(e) {
 }
 
 
-       console.log('RETURN FORM', data, props)
+       //console.log('RETURN FORM', data, props)
 return (       
     
             <div className="container pl-0" style={{marginTop: '10px', marginLeft:'2px', marginRight:'2px'}}>
                 
-                <form className="form-row" style={{width:'100%'}} onSubmit={onSubmit}>
-                    <div className="form-group col-sm-6"> 
-                    <TickerSelect class={{width:'8rem'}} options={data.tickers} onFocus={onFocusTicker} onChange={onChangeTicker} />
+                <form className="form-row pb-0 mb-0" style={{width:'100%'}} onSubmit={onSubmit}>
+                    <div className="form-group col-sm-6 mb-0"> 
+                    <TickerSelect options={data.tickers} onFocus={onFocusTicker} onChange={onChangeTicker} />
                         <input  type="hidden"
                                 className="form-control"
                                 value={data.name}
@@ -270,7 +270,7 @@ return (
                     {/* <Spot onRef={ref => (spot = ref)} baseAsset={data.baseAsset}  exchange={props.exchange} clearTicker={clearTicker} selectedTicker={data.selectedTicker}  /> */}
                     <Technicals />
                     </div>
-                    <div className="form-group col-sm-6"> 
+                    <div className="form-group col-sm-6 mb-0"> 
                     
                     <Spot onChangePrice={onChangePrice} clearTicker={clearTicker}  baseAsset={data.baseAsset}  exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
                     
@@ -300,12 +300,12 @@ return (
                                 />
                     </div>
                     <Wallet tab={props.tab} clearAmount={clearAmount} wallet={wallet.wallet} ticker={data.selectedTicker} setAmount={onChangeAmount}/>
-                    <div className="form-group"> 
+                    <div className="form-group mb-0 pb-0"> 
                         <label>Total:</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
                 </div>
-                <div className="col-sm-6">
-                    Depth
+                <div className="col-sm-6 form-group">
+                <label>Depth</label>
                     <Depth onChangePrice={onChangePrice} clearTicker={clearTicker}  baseAsset={data.baseAsset}  exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
                 </div>
                     
@@ -324,7 +324,7 @@ return (
                                 
                                 />
                 </div>
-                <div className="form-group "> 
+                <div className="form-group"> 
                         <label>Total</label>
                         <input  type="text"
                                 placeholder={ props.tab == 'buy' ? 'Total '+data.baseAsset : 'Total '+data.sellAsset}
@@ -334,12 +334,12 @@ return (
                                 />
                 </div>
                 <div><Wallet clearAmount={clearAmount} tab={props.tab} wallet={wallet.wallet} ticker={data.selectedTicker}  setAmount={onChangeAmount}/></div>
-                    <div className="form-group"> 
+                    <div className="form-group mb-0"> 
                         <label>Total:</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
                 </div>
-                <div className="col-sm-6">
-                    Depth
+                <div className="col-sm-6 form-group">
+                    <label>Depth</label>
                     <Depth onChangePrice={onChangePrice} clearTicker={clearTicker}  baseAsset={data.baseAsset}  exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
                 </div>
                 </div>
@@ -347,15 +347,15 @@ return (
                 </Tab>
                 </Tabs>
                     
-                    <div className="form-group col-sm-12">
+                    <div className="form-group col-sm-12 pb-0 mb-0">
                         { props.tab ==='buy' ? <input type="submit" value="Place buy order" className="btn btn-success" /> :
                         <input type="submit" value="Place sell order" className="btn btn-danger" />
                     }
                     </div>
                 </form>
-            <div className="d-flex justify-content-between flex-wrap  align-items-center pb-2 mb-3 border-bottom">
+            {/* <div className="d-flex justify-content-between flex-wrap  align-items-center pb-2 mb-3 border-bottom">
                 <Trade exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
-            </div>
+            </div> */}
             </div>
         
         )

@@ -211,20 +211,20 @@ const thisExchange = ex.filter(exchange =>
             <div className="container" style={{marginTop: '2px', marginBottom: '2px'}}>
                 
                  <div onClick={onPriceClick} style={{width:'72%', paddingLeft:'1px',paddingTop:'1px'}} className="float-left"><h6 className={data.priceStyle}>{data.lastPrice}</h6></div>
-                <div style={{width:'28%', paddingLeft:'1px',paddingTop:'1px'}} className="float-left"><small>{data.baseAsset}</small></div>
+                <div style={{width:'28%', paddingLeft:'1px'}} className="float-left"><h6> {data.baseAsset}</h6></div>
 
-                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', marginTop:'0px' }} className="float-left"><small>{data.high24hr}</small></div>
-                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px' }}  className="float-left"><small>High</small></div>
+                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', marginTop:'0px' }} className="tiny pt-1 float-left"><small>{data.high24hr}</small></div>
+                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px' }}  className="tiny-label pt-1 float-left"><small >High</small></div>
 
-                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', marginTop:'0px'}} className="float-left"><small>{data.low24hr}</small></div>
-                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px' }}  className="float-left"><small> Low</small></div>
+                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', marginTop:'0px'}} className="tiny float-left"><small>{data.low24hr}</small></div>
+                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px' }}  className="tiny-label float-left"><small> Low</small></div>
 
-                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', color:'', marginTop:'0px' }} className="float-left"><small>{data.open24hr}</small></div>
-                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px' }}  className="float-left"><small>Open</small></div>
+                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', color:'', marginTop:'0px' }} className="tiny float-left"><small>{data.open24hr}</small></div>
+                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px' }}  className="tiny-label float-left"><small>Open</small></div>
 
 
-                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', color:'', marginTop:'0px'}} className="float-left"><small>{data.volume24hr}</small></div>
-                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px'}}  className="float-left"><small> Volume</small></div>
+                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', color:'', marginTop:'0px'}} className="tiny float-left"><small>{data.volume24hr}</small></div>
+                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px'}}  className="tiny-label float-left"><small> Volume</small></div>
 
             </div>
             

@@ -2,12 +2,45 @@
   text-align: center;
 }
 
+input {
+  min-width:149px;
+}
+
+.react-select-container {
+  width:180px;
+}
+
+h6{
+  font-size: 12px !important;
+}
+
+.react-select__control {
+  width:180px;
+}
+
+.font-face-din {
+  font-family: "DINRegular";
+ }
+
 .tab-content{
   width:100%!important;
 }
-.tiny, tiny {
-  font-size: 50%;
+label {
+  font-size: 14px !important;
+}
+.tiny {
+  font-family: "DINRegular";
+  font-size: 14px !important;
+  font-weight: 400;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+.tiny-label {
+  font-family: "DINRegular";
+  font-size: 16px !important;
   font-weight: 800;
+  line-height: 12px;
   white-space: nowrap;
 }
 

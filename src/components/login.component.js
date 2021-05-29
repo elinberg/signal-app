@@ -87,7 +87,7 @@ export const Login = () => {
                     payload: {  message:'Login Successful', alertType: 'success', timeout:3000}
                 })
                 
-                history.push("/exchanges");
+                history.push("/dashboard");
                 
             });
             
@@ -103,10 +103,10 @@ export const Login = () => {
     const search = window.location.search;
     const params = new URLSearchParams(search);
     const offline = params.get('offline');
-    if( offline === true ){
+    if( offline == true ){
         online = false;
     } else{
-        if(online === false){
+        if(online == false){
             online = false;
         } else {
             online = true;

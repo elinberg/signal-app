@@ -28,12 +28,12 @@ useEffect(() => {
 
 return (
     
-    <div className="card" style={{float:'left', width: '29rem', marginRight:'10px'}}>
+    <div className="card" style={{float:'left', width: '24rem', marginRight:'10px'}}>
         
         <div style={{paddingLeft:'5px', paddingRight:'5px'}} className="card-body">
             <h5 className="card-title">{props.exchange.name} </h5>
             <Tabs defaultActiveKey="buy" 
-                id={'buy-sell-tab-'+props.exchange.name}  onSelect={onSelect} className="nav nav-pills nav-fill">
+                id={'buy-sell-tab-'+props.exchange.name}  onSelect={onSelect} className="nav nav-pills nav-justified nav-fill">
                 <Tab className="tab" data-toggle="tab" eventKey="buy" title="Buy" tabClassName="">
                 {/* <ExchangeTradeForm exchange={props.exchange} /> */}
                 </Tab>
@@ -177,7 +177,7 @@ console.log('ExchangeTradeList', data)
         return null;
   }
   return (
-    <div className="container" style={{marginTop: '35px', width:'100%'}}>
+    <div className="container" style={{marginTop: '10px', width:'100%'}}>
         
         {listExchange()}
 

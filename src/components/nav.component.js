@@ -11,6 +11,7 @@ import { LOGOUT, SET_ALERT_OVERWRITE, SET_ALERT} from './types';
 export const Nav = () => {
   const { state, dispatch } = React.useContext(AuthContext);
   const history = useHistory();
+  
   const onLogout = e => {      
     console.log('Logout');
     localStorage.setItem('token', null);
@@ -25,13 +26,19 @@ export const Nav = () => {
     })
     history.push("/login");
  }
+
+ const onClick = () => {
+   if(!state.isOpen){
+     dispatch( {type:'MENU_STATE',payload:true})
+   }
+ }
   return (
     <div>
     
           <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
             <div className="">
             <div className="pull-left">
-            <a className="navbar-brand" href="https://codingthesmartway.com" target="_blank" rel="noreferrer">
+            <a className="navbar-brand" onClick={onClick} href="#" target="" rel="noreferrer">
               <img src={logo} width="30" height="30" alt="CodingTheSmartWay.com" />
             </a>
             <Link to="/dashboard" className="navbar-brand">Order Desk</Link>
