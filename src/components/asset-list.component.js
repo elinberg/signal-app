@@ -43,7 +43,7 @@ const _transform = require('./assets/transformer');
 const onDelete = e => {
     
     console.log(e.target.asset)
-    axios.delete( 'http://localhost:4000/asset/delete/'+e.target.id)
+    axios.delete( '/api/asset/delete/'+e.target.id)
     .then(res => {
         console.log(res.data);
         
@@ -119,7 +119,7 @@ const AssetList = props => {
     
         console.log('GETTING TRADES', props, orderTab);
         let transformer = new _transform(props.exchange.name);
-        axios.get('http://localhost:4000/'+props.exchange.name+'/trades?status=4&symbol='+props.selectedTicker, {
+        axios.get('/api/'+props.exchange.name+'/trades?status=4&symbol='+props.selectedTicker, {
             headers: {
             'xbmkey': key,
             'xbmname': apiName,
@@ -129,7 +129,7 @@ const AssetList = props => {
         .then(response => {
             // this.setState({ asset: response.data });
             
-            console.log('TRADES DATA' , response.data, props.data,'http://localhost:4000/'+props.exchange.name+'/trades?status=4&symbol='+props.selectedTicker);
+            console.log('TRADES DATA' , response.data, props.data,'/api/'+props.exchange.name+'/trades?status=4&symbol='+props.selectedTicker);
             mytrades = transformer.getTrades(response.data.trades,props.selectedTicker)
             /////////
             
@@ -143,7 +143,7 @@ const AssetList = props => {
                 listenKey = response.data.listenKey;
                 console.log('LISTENKEY', listenKey);
                 if(listenKey === undefined){
-                    axios.get('http://localhost:4000/'+props.exchange.name+'/orders', {
+                    axios.get('/api/'+props.exchange.name+'/orders', {
                         headers: {
                         'xbmkey': key,
                         'xbmname': apiName,
