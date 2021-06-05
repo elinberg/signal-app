@@ -1,6 +1,7 @@
 import React from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+//import "bootswatch/dist/lux/bootstrap.min.css"
 import './App.css'
 import Alert from "./components/alert.component";
 import Nav from "./components/nav.component";
@@ -10,7 +11,15 @@ import { SET_ALERT, REMOVE_ALERT, LOGIN, LOGOUT, SET_ALERT_OVERWRITE} from "./co
 
 
 export const AuthContext = React.createContext();
-
+window.onbeforeunload = (event) => {
+  const e = event || window.event;
+  // Cancel the event
+  e.preventDefault();
+  if (e) {
+    e.returnValue = ''; // Legacy method for cross browser support
+  }
+  return ''; // Legacy method for cross browser support
+};
 const initialState = {
   isAuthenticated: false,
   isOpen: false,
@@ -28,11 +37,13 @@ const initialState = {
 export const  initalData = {
   onTabSelect: {},
   prev: '',
+  theme:'dark',
   isOpen: false,
   setTab:{},
   tab: '',
   selectedTicker:'',
   exchange: [],
+  asset: [],
   name: '',
   apiKey:  '',
   secret:  '',
@@ -41,7 +52,6 @@ export const  initalData = {
   bids:[],
   prevSelectedTicker: '',
   tickerEndpoint: '',
-  secret: '',
   price:'',
   qty:'',
   amount:'',
@@ -54,7 +64,7 @@ const reducer = (state, action) => {
       localStorage.setItem("username", action.payload.username);
       localStorage.setItem("token", action.payload.token);
       const ls = localStorage.getItem('exchanges') ? localStorage.getItem('exchanges') : false;
-      console.log('exchanges', ls)
+      //console.log('exchanges', ls)
       if(ls === false){
           localStorage.setItem('exchanges',JSON.stringify([]));
       }

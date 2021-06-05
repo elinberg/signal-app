@@ -1,13 +1,10 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useHistory } from "react-router";
-import {SET_ALERT_OVERWRITE} from './types';
-import { AuthContext } from "../App";
+//import {SET_ALERT_OVERWRITE} from './types';
 import ModalExchange from "./modal-exchange.component"
-import Modal from "react-bootstrap/Modal";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { combineReducers } from 'redux';
+
 //import { AuthContext } from "../App";
 //App.use(cors());
  const Exchange  = props => (
@@ -36,7 +33,6 @@ const ExchangeList = () => {
 
     const [data, setData] = React.useState(initialState);
     
-      let history = useHistory();
 
 
 
@@ -63,7 +59,7 @@ const ExchangeList = () => {
     const [title, setTitle] = React.useState("Transitioning...");
     const [url, setUrl] = React.useState("");
     //const [time, setTime] = React.useState("");
-    const { dispatch } = React.useContext(AuthContext);
+   
     const showModal = props => {
         //document.getElementById('exchangeModal').setAttribute('show', true);
         setIsOpen(true);
@@ -101,9 +97,7 @@ const ExchangeList = () => {
         
         return data.exchange.map(function(currentExchange, i){
            
-            
-             console.log('DATA',currentExchange);
-            var datas = '';
+    
             
             // var config = {
             //     method: 'get',
@@ -128,8 +122,8 @@ const ExchangeList = () => {
 
 
   return (
-    <div className="container" style={{marginTop: '35px', width:'100%'}}>
-        
+    <div style={{ marginLeft: '12px' }} className="float-left pt-2">
+        <h5>Exchanges</h5>
         {listExchange()}
 
         <ModalExchange id="exchangeModal" setExchange={setExchange} exchange={exchange} title={title} url={url} setUrl={setUrl} setTitle={setTitle} isOpen={isOpen} show={true} hideModal={hideModal} showModal={showModal} tabindex="-1"></ModalExchange>   

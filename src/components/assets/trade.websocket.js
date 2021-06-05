@@ -2,27 +2,38 @@ const zlib = require("zlib");
 const RobustWebSocket = require('robust-websocket');
 const _transform = require('./transformer')
 //const prevPrice = '0.00';
-export default  function TradeWebSocketConnection(props, setData, data, msg) {
+export default  function TradeWebSocketConnection(props, listenKey, credentials, trades) {
 
 const obj = Object.create(protoMethods);
  obj.client = {};
+
  //obj.msg = msg;
- return obj.getClient(props,setData,data, msg);
+ return obj.getClient(props,props.setData,props.data, listenKey, credentials, trades);
 
 }
     //console.log('Previous Ticker', localStorage.getItem('selectedTicker'), this.props.selectedTicker);
  const protoMethods = {
-    getClient: function(props, setData, data, msg){
+
+    getClient: function(props, setData, data, listenKey, credentials, trades){
+        //console.log('getClient',props, setData, data, msg, trades)
+        if(props.selectedTicker === undefined){
+            return;
+        }
         let url=''
-        if(props.exchange.name == 'Binance'){
-            url = 'wss://stream.binance.com:9443/ws/'+props.selectedTicker.replace(/_/g,"").toLowerCase()+'@trade';
+        if(props.exchange.name === 'Binance'){
+            url = 'wss://stream.binance.us:9443/ws/'+listenKey;
         } else {
             url = 'wss://ws-manager-compress.bitmart.com?protocol=1.1'
+            
         }
 
+        console.log('Connecting to:', url)
+    //this.trades = []
+
+   
     this.client = new RobustWebSocket(url, null, {
                 // The number of milliseconds to wait before a connection is considered to have timed out. Defaults to 4 seconds.
-                timeout: 4000,
+                timeout: 60000,
                 // A function that given a CloseEvent or an online event (https://developer.mozilla.org/en-US/docs/Online_and_offline_events) and the `RobustWebSocket`,
                 // will return the number of milliseconds to wait to reconnect, or a non-Number to not reconnect.
                 // see below for more examples; below is the default functionality.
@@ -40,10 +51,22 @@ const obj = Object.create(protoMethods);
                 })
         this.client.binaryType='blob'; 
         this.client.addEventListener('open', function(event) {
-         console.log('WebSocket Client Connected');
-        if(msg.length > 0 && props.exchange.name == 'Bitmart'){
-            this.send(msg);
-        }
+            if(props.exchange.name === 'Binance'){
+                //console.log('GOT', response.data.listenKey)
+               
+            } else {
+
+                var timestamp = Date.now().toString();
+                var signature = require("crypto")
+                                .createHmac("sha256", credentials.secret)
+                                .update(timestamp+'#'+credentials.apiName+'#bitmart.WebSocket')
+                                .digest("hex"); //binary, hex,base64
+                var msg = JSON.stringify({"op": "login", "args":[credentials.key,timestamp,signature]});
+                this.send(msg)
+            }
+         console.log('WebSocket Client Connected to ', props.exchange.name);
+         
+        
         // let iid2 = setInterval(() =>{
         //     //console.log('READYSTATE1',client['Bitmart'].readyState)
         //     if(props.exchange.name == 'Bitmart'){
@@ -53,22 +76,31 @@ const obj = Object.create(protoMethods);
         //     } 
         // }, 15000);
         })
-        var prevPrices = [];
-        this.client.addEventListener('message', function(event) {
+    this.client.addEventListener('message', function(event) {
+            // text frame
+            //console.log('Binance TradeWSQQQQ',JSON.parse(event.data))
+            if(event.data === 'pong' || event.data === 'ping' ){
+                //this.send("ping")
+                return;
+            }
+            console.log('message',event.data)
+            
+            if(event.data instanceof Blob ) {
 
-        
-        let m = event.data
-        console.log('we got: ' , m)
-        if(m  == '{"event":"login"}'){
-            msg = JSON.stringify({"op": "subscribe", "args":["spot/user/order:"+props.selectedTicker]});
-            //msg = JSON.stringify({"op": "subscribe", "args":["spot/user/order:SHIB_USDT"]});
-            this.send(msg);
-           
-        }
+            } else {
+                if( JSON.parse(event.data).event === 'login' ){
+                    
+                    let smsg = JSON.stringify({"op": "subscribe", "args":["spot/user/order:"+props.selectedTicker]});
+                    console.log('SUBSCRIBING:' , smsg)
+                    
+                    this.send(smsg);
+                
+                } 
+            }
         // var newState;
-        let newData = [] ;
-             if(event.data instanceof Blob) {
-        //let transformer = new _transform(props.exchange.name);
+    if(event.data instanceof Blob ) {
+        if(props.exchange.name === 'Bitmart'){
+        let transformer = new _transform(props.exchange.name);
         //console.log(event.data)
         const stream = event.data.stream();
         const reader = stream.getReader();
@@ -82,77 +114,144 @@ const obj = Object.create(protoMethods);
 
                 var json = JSON.parse(buffer.toString('UTF-8'))
 
-                //let prevPrice = this.prevPrice;
-                console.log('TRDATA',json.data);
-                //let newState = transformer.getStream(json.data[0],props.selectedTicker,prevPrices);
-                if(json.data.length > 0){
-                    newData.push(json.data[0]);
+                /////////////////////////
+                // let transformer = new _transform(props.exchange.name);
+                // try {
+                //     let json = JSON.parse(event.data);
+                //     if(json.e.length > 0 && json.e == 'executionReport'){
+                //         setData({
+                //             ...data,
+                //             asset:[]
+                //         })
+    
+                //         console.log('TRDATA1',json,data);
+    
+                //         let newTrade = transformer.getTradeStream(json,props.selectedTicker)
+                //         let orderId;
+                //         if(newTrade.state == 'CANCELED'){
+                //             orderId=newTrade.order_id
+                //             trades = trades.filter(trade => trade.order_id !== orderId)
+                //         } else {
+                //             orderId=='-1'
+                //             trades.unshift(newTrade)
+                //         }
+                            
+                //         console.log('TRDATA4', trades);
+                        
+                //         setData({
+                //             ...data,
+                //             asset:trades
+                //         })
+    
+                //     }
+    
+                // } catch(e){
+                //     console.log(e);
+                // }
+
+
+                //////////////////////////
+                console.log('pre pre pre pre undefined Transform', json)
+                if(json.data !== undefined && json.data.length > 0){
+                    console.log('pre pre pre Transform', json)
                     setData({
                         ...data,
-                        newData
+                        asset:[]
                     })
+                        console.log('pre pre Transform', json.data, trades)
+
+                        let newTrade = transformer.getTradeStream(json.data[0],props.selectedTicker)
+                        let orderId;
+                        if(newTrade.state === 'CANCELED'){
+                            orderId=newTrade.order_id
+                            trades = trades.filter(trade => trade.order_id !== orderId)
+                            console.log('FILTERED', trades);
+                            if(trades.length < 1){
+                                
+                            }
+                        } else {
+                            orderId='-1'
+                            trades.unshift(newTrade)
+                        }
+                                     
+                    console.log('TRDATA4', trades);
+                    
+                    setData({
+                        ...data,
+                        asset:trades
+                    })
+
+
+                    
+                   
                 }
                 
                
                 
-                // prevPrices.push(newState.lastPrice );
-
-                // if(prevPrices.length > 2){
-                //     prevPrices.splice(0,1);
-                // }
-                //console.log('Text Frame Bitmart');
-                //console.log(err,json.data[0]);
                 }); 
             }  
         })
-        
-        } else {
-            // text frame
-
-            if(event.data == 'pong' || event.data == 'ping' ){
-                //client.send("ping")
-                return;
-            }
+    } 
+    } else {
             
-            //let transformer = new _transform(props.exchange.name);
+    if(event.data === 'pong' || event.data === 'ping' ){
+        //this.send("ping")
+        return;
+    }
+    if(props.exchange.name === 'Binance'){
+            let transformer = new _transform(props.exchange.name);
             try {
                 let json = JSON.parse(event.data);
-                
-                //let newData = transformer.getStream(json, props.selectedTicker, prevPrices);
-                
-                // newData.push(json.data[0])
-                // setData({
-                //     ...data,
-                //     ...newData
-                // })
-            //prevPrices.push(newData.lastPrice );
+                if(json.e.length > 0 && json.e === 'executionReport'){
+                    setData({
+                        ...data,
+                        asset:[]
+                    })
 
-            // if(prevPrices.length > 2){
-            //     prevPrices.splice(0,1);
-            // }
+                    console.log('TRDATA1',json,data);
+
+                    let newTrade = transformer.getTradeStream(json,props.selectedTicker)
+                    let orderId;
+                    if(newTrade.state === 'CANCELED'){
+                        orderId=newTrade.order_id
+                        trades = trades.filter(trade => trade.order_id !== orderId)
+                    } else {
+                        orderId='-1'
+                        trades.unshift(newTrade)
+                    }
+                        
+                    console.log('TRDATA4', trades);
+                    
+                    setData({
+                        ...data,
+                        asset:trades
+                    })
+
+                }
 
             } catch(e){
                 console.log(e);
             }
 
-        
+    }
             
             //console.log('Text Frame Binance',);
-        }
-        })
+    }
+    })
 
         this.client.addEventListener('close', function(event) {
             //prevPrices = [];
-            setData({
-                asks: [],
-                bids: []
-            });
+            
             if(event.data === undefined){
                 return;
             }
+            setData({
+
+                asset: []
+            });
         //console.log('we got: ' + event.data)
         })
 
-        return (this.client);
+        return ({client:this.client,setData:this.setData,trades:this.trades});
      }
     }   

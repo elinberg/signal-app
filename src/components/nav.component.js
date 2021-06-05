@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 //import Alert from "./alert.component";
 import axios from 'axios';
 import { useHistory } from "react-router";
-import { LOGOUT, SET_ALERT_OVERWRITE, SET_ALERT} from './types';
+import { LOGOUT, SET_ALERT_OVERWRITE } from './types';
 
 export const Nav = () => {
   const { state, dispatch } = React.useContext(AuthContext);

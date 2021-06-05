@@ -13,11 +13,9 @@ const Alert = () => {
         //e.target.parent.toast('hide');
     }
     if(typeof alerts !== 'undefined' && alerts !== null && alerts.length > 0){
-        let alertsList,als, aid;
+        let alertsList, aid;
         
         alertsList = alerts.filter(alert => alert.message !== 'null').map((alert,i) => {
-            
-            als = 'alert alert-'+alert.alertType;
             aid = alert.id;
             setTimeout(() => dispatch({ type: REMOVE_ALERT, payload: alert.id}), alert.timeout);
             // return (

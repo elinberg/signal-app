@@ -1,11 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { Route } from "react-router-dom";
 import { AuthContext } from "../App";
-import {  Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 //import { Container, Row, Col, Nav, Navbar} from "react-bootstrap";
 
-import Alert from "./alert.component";
 //import Dashboard from "./dashboard.component";
 import Login from "./login.component";
 import AssetList from "./asset-list.component";
@@ -14,11 +13,11 @@ import CreateAsset from "./create-asset.component";
 import Register from "./register.component";
 import Dashboard from "./dashboard.component";
 import Exchanges from "./exchanges.component";
-import Menu from "./menu.component";
+import TopMenu from "./menu.component";
 
 export const Sidebar = props => {
 
-    const { state, data, setData, dispatch } = React.useContext(AuthContext);
+    const { state, data } = React.useContext(AuthContext);
     let location = useLocation();
     //console.log(location.pathname);
     //const { state, dispatch } = React.useContext(AuthContext);
@@ -99,14 +98,14 @@ var isMenuOpen = function(state) {
 };
 
     return (
-        <div id="outer-container" className="container-fluid">
+        <div id="outer-container" className="container-fluid" style={{width:'100%'}}>
         <div  className="row"> 
         
           { state.isAuthenticated  && location.pathname !== '/register' && (
-          <Menu pageWrapId={ "main" } outerContainerId={ "outer-container" } styles={styles}  onStateChange={isMenuOpen}  isOpen={data.isOpen }  isAuthenticated={state.isAuthenticated} />)}
+          <TopMenu pageWrapId={ "main" } outerContainerId={ "outer-container" } styles={styles}  onStateChange={isMenuOpen}  isOpen={data.isOpen }  isAuthenticated={state.isAuthenticated} />)}
           <main id="main"  role="main" style={{marginLeft:'unset'}}  className="col-md-12 ml-sm-auto col-lg-12 mt-3 px-0">
           <Route path="/dashboard" exact render={ () => <Dashboard isOpen={isOpen} />} />
-          <Route path="/asset" exact component={AssetList} />
+          <Route path="/asset" exact render={ props => <AssetList showHeading={true} />} />
           <Route path="/exchanges" exact component={Exchanges} />
           <Route path="/edit" component={EditAsset} />
           <Route path="/create" component={CreateAsset} />

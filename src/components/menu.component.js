@@ -1,11 +1,11 @@
 import React from 'react';
 import {  Link } from "react-router-dom";
-import { push as Menu } from 'react-burger-menu';
+import { slide as Menu } from 'react-burger-menu';
 import { AuthContext } from "../App";
 
-export default props => {
+const TopNav = props => {
 
-    const { state, data, setData, dispatch } = React.useContext(AuthContext);
+    const {  data, setData } = React.useContext(AuthContext);
     const handleStateChange = data => {
         //console.log('Oh Fuck', data)
         setData({isOpen: data.isOpen})  ;
@@ -35,3 +35,4 @@ export default props => {
   );
 }
 
+export default TopNav;

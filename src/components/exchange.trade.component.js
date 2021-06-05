@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useHistory } from "react-router";
-import {SET_ALERT_OVERWRITE} from './types';
-import { AuthContext } from "../App";
+//import {SET_ALERT_OVERWRITE} from './types';
+
 import ExchangeTradeForm from "./exchange.tradeForm.component"
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
@@ -12,7 +10,7 @@ const [key, setKey] = useState('buy');
 const [prev, setPrev] = useState('sell');
 const onSelect = k => {
     console.log('onSelect',k)
-    if(k == 'buy'){
+    if(k === 'buy'){
         setPrev('sell')
     } else {
         setPrev('buy')
@@ -28,10 +26,9 @@ useEffect(() => {
 
 return (
     
-    <div className="card" style={{float:'left', width: '24rem', marginRight:'10px'}}>
+    <div className="card" style={{float:'left', width: '26rem', marginLeft:'10px',  marginRight:'5px'}}>
         
-        <div style={{paddingLeft:'5px', paddingRight:'5px'}} className="card-body">
-            <h5 className="card-title">{props.exchange.name} </h5>
+        <div style={{paddingLeft:'10px', paddingRight:'0px', paddingTop:'10px' ,paddingBottom:'5px'}} className="card-body">
             <Tabs defaultActiveKey="buy" 
                 id={'buy-sell-tab-'+props.exchange.name}  onSelect={onSelect} className="nav nav-pills nav-justified nav-fill">
                 <Tab className="tab" data-toggle="tab" eventKey="buy" title="Buy" tabClassName="">
@@ -42,6 +39,7 @@ return (
                 </Tab>
             </Tabs>
             <ExchangeTradeForm onTabSelect={onSelect} prev={prev} setTab={setKey} tab={key} exchange={props.exchange} /> 
+            {/* <AssetList selectedTicker={props.selectedTicker} exchange={props.exchange}/> */}
             {/* <div class="btn-group" style={{width:'100%'}} role="group" aria-label="Buy or Sell">
                 <button type="button" class="btn btn-primary btn-block btn-sm mt-0 active">Buy</button>
                 <button type="button" class="btn btn-secondary btn-block btn-sm mt-0">Sell</button>
@@ -74,7 +72,6 @@ const ExchangeTradeList = props => {
 
     const [data, setData] = React.useState(initialState);
     
-      let history = useHistory();
 
 // if(props.exchange === undefined){
 //     return null;
@@ -103,14 +100,11 @@ console.log('ExchangeTradeList', data)
 
          }, []);
     //console.log('isData', data)
-    const [isOpen, setIsOpen] = React.useState(false);
-    //const [hideModal, setHideModal] = React.useState({});
-    const [exchange, setExchange] = React.useState({});
-    //const [exchange, setExchange] = React.useState(props.exchange);
-    const [title, setTitle] = React.useState("Transitioning...");
-    const [url, setUrl] = React.useState("");
+    const [ setIsOpen] = React.useState(false);
+    const [ setTitle ] = React.useState("Transitioning ....");
+    const [ setUrl ] = React.useState("");
     //const [time, setTime] = React.useState("");
-    const { dispatch } = React.useContext(AuthContext);
+    
     const showModal = props => {
         //document.getElementById('exchangeModal').setAttribute('show', true);
         setIsOpen(true);
@@ -150,7 +144,6 @@ console.log('ExchangeTradeList', data)
            
             //setData(data)
              console.log('DATA',currentExchange);
-            var datas = '';
             
             // var config = {
             //     method: 'get',
@@ -177,8 +170,8 @@ console.log('ExchangeTradeList', data)
         return null;
   }
   return (
-    <div className="container" style={{marginTop: '10px', width:'100%'}}>
-        
+    <div className="pull-left" style={{marginTop: '36px', width:'100%'}}>
+       
         {listExchange()}
 
         {/* <ModalExchange id="exchangeModal" setExchange={setExchange} exchange={exchange} title={title} url={url} setUrl={setUrl} setTitle={setTitle} isOpen={isOpen} show={true} hideModal={hideModal} showModal={showModal} tabindex="-1"></ModalExchange>    */}

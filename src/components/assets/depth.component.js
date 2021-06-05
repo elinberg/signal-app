@@ -1,24 +1,19 @@
-import React, { Component, useEffect,useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from "react-router";
-import { AuthContext } from '../../App';
 import DepthWebSocketConnection from './depth.websocket';
-const _transform = require('./transformer')
 
 const Depth = props => {
-const { state, dispatch } = React.useContext(AuthContext); 
 const history = useHistory();
 const [intervalId, setIntervalId ] = useState('');
 const [ data, setData ]= useState( {})
 //const [ prevPrice, setPrevPrice ]= useState('0.00')  ;    
-let [online, isOnline] = useState(navigator.onLine);
+let [isOnline] = useState(navigator.onLine);
 const setOnline = () => {
     console.log('We are online!');
     isOnline(true);
 };
 const setOffline = () => {
     console.log('We are offline!');
-    //props.selectedTicker='';
-    //props.clearTicker();
     history.push('/login?offline=true')
     isOnline(false);
 };  
@@ -33,7 +28,7 @@ useEffect(() => {
         //console.log('HANDLESTATE')
   const ex = JSON.parse(localStorage.getItem('exchanges'))
         //console.log('local', ex)
-const thisExchange = ex.filter(exchange => 
+   let thisExchange = ex.filter(exchange => 
             props.exchange.name === exchange.name
         )
         if(thisExchange){ 
@@ -41,7 +36,7 @@ const thisExchange = ex.filter(exchange =>
             thisExchange = [{ 
                 name: props.exchange.name,
                 apiKey: '',
-                secret: '',}];        
+                secret: ''}];        
         }
 
         setData({
@@ -53,11 +48,10 @@ const thisExchange = ex.filter(exchange =>
             bids:[],
             selectedTicker: '',
             prevSelectedTicker: props.selectedTicker,
-            tickerEndpoint: props.exchange.tickerEndpoint,
-            secret: thisExchange.length > 0 ? thisExchange[0].secret: '',
+            tickerEndpoint: props.exchange.tickerEndpoint
         });
 
-        console.log('exchange' ,props.exchange,props);
+        //console.log('exchange' ,props.exchange,props);
         if(props.selectedTicker.length < 3){
             return;
         }
@@ -66,20 +60,20 @@ const thisExchange = ex.filter(exchange =>
         if(localStorage.getItem('selectedTicker') === undefined){ 
             localStorage.setItem('selectedTicker',props.selectedTicker);
             msg = JSON.stringify({"op": "subscribe", "args":["spot/depth5:"+props.selectedTicker]});
-            console.log('ws_send1',props.selectedTicker)
+            //console.log('ws_send1',props.selectedTicker)
            // ws_send(msg);
         } else if(props.selectedTicker === localStorage.getItem('selectedTicker')){
             console.log('ws_send2',props.selectedTicker)
         } else if(props.selectedTicker !== localStorage.getItem('selectedTicker')){
             msg = JSON.stringify({"op": "unsubscribe", "args": ["spot/depth5:"+localStorage.getItem('selectedTicker')]});
-            console.log('ws_send3',props.selectedTicker)
+            //console.log('ws_send3',props.selectedTicker)
             //ws_send(msg);
             localStorage.setItem('selectedTicker',props.selectedTicker);
             msg = JSON.stringify({"op": "subscribe", "args":["spot/depth5:"+props.selectedTicker]});
-            console.log('ws_send4',props.selectedTicker)
+            //console.log('ws_send4',props.selectedTicker)
             //ws_send(msg);
         }
-        if(props.exchange.name == 'Binance'){
+        if(props.exchange.name === 'Binance'){
             //msg='';
         }
         let client = [];
@@ -94,7 +88,7 @@ const thisExchange = ex.filter(exchange =>
 
         // let iid = setInterval(() =>{
             
-        //     if(client['Bitmart'].readyState == 1){
+        //     if(client['Bitmart'].readyState === 1){
         //         //console.log('DEPTH SENDING:',msg)
         //         client['Bitmart'].send(msg);
         //         clearInterval(iid)
@@ -104,7 +98,7 @@ const thisExchange = ex.filter(exchange =>
 
         let iid = setInterval(() =>{
             //console.log('READYSTATE1',client['Bitmart'].readyState)
-            if(client['Bitmart'].readyState == 1 ){
+            if(client['Bitmart'].readyState === 1 ){
                 //console.log('PINGIN:','ping')
                 client['Bitmart'].send('ping');
                 //client['Bitmart'].send(msg);
@@ -162,7 +156,7 @@ const thisExchange = ex.filter(exchange =>
                 </ul>
                 <ul style={{listStyleType:'none', paddingLeft:'0px'}}>
                 {data.bids.map((value, index) => {
-                            return <li className="tiny" key={index} style={{whiteSpace:'nowrap'}}><small onClick={onPriceClick} className="tiny text-success">{value[0]}</small> <small className="" >{value[1]}</small></li>
+                            return <li className="tiny" key={index} style={{whiteSpace:'nowrap'}}><small onClick={onPriceClick} className="text-success">{value[0]}</small> <small className="" >{value[1]}</small></li>
                 })}
                 </ul>
                 

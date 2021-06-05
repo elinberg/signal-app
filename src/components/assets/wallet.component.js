@@ -5,11 +5,11 @@ import React from 'react';
      let currency = '';
      let frozen = '';
      let asset, wallet;
-     if( props.wallet == undefined ){
+     if( props.wallet === undefined ){
          return;
      }
 
-     if(props.tab == 'buy'){
+     if(props.tab === 'buy'){
         
         asset = props.ticker !== undefined ? props.ticker.replace(/.*_/g,"") : '';
     } else {

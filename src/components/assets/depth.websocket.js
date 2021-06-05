@@ -1,6 +1,5 @@
 const zlib = require("zlib");
 const RobustWebSocket = require('robust-websocket');
-const _transform = require('./transformer')
 //const prevPrice = '0.00';
 export default  function DepthWebSocketConnection(props, setData, data, msg) {
 
@@ -14,7 +13,7 @@ const obj = Object.create(protoMethods);
  const protoMethods = {
     getClient: function(props, setData, data, msg){
         let url=''
-        if(props.exchange.name == 'Binance'){
+        if(props.exchange.name === 'Binance'){
             url = 'wss://stream.binance.com:9443/ws/'+props.selectedTicker.replace(/_/g,"").toLowerCase()+'@depth5@100ms';
         } else {
             url = 'wss://ws-manager-compress.bitmart.com?protocol=1.1'
@@ -41,7 +40,7 @@ const obj = Object.create(protoMethods);
         this.client.binaryType='blob'; 
         this.client.addEventListener('open', function(event) {
          console.log('WebSocket Client Connected');
-         if(msg.length > 0 && props.exchange.name == 'Bitmart'){
+         if(msg.length > 0 && props.exchange.name === 'Bitmart'){
             this.send(msg);
         }
         // let iid2 = setInterval(() =>{
@@ -53,7 +52,7 @@ const obj = Object.create(protoMethods);
         //     } 
         // }, 15000);
         })
-        var prevPrices = [];
+        //var prevPrices = [];
         this.client.addEventListener('message', function(event) {
 
         //console.log('we got: ' + event.data)
@@ -97,7 +96,7 @@ const obj = Object.create(protoMethods);
         } else {
             // text frame
 
-            if(event.data == 'pong' || event.data == 'ping' ){
+            if(event.data === 'pong' || event.data === 'ping' ){
                 //client.send("ping")
                 return;
             }

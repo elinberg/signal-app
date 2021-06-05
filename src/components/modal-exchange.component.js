@@ -1,10 +1,7 @@
 import React from 'react';
-//import {SET_ALERT_OVERWRITE} from './types';
-//import { AuthContext } from "../App";
 import Modal from "react-bootstrap/Modal";
 import ExchangeForm from "./exchange.component"
 import "bootstrap/dist/css/bootstrap.min.css";
-import ExchangeList from './exchanges.component';
 
 
 

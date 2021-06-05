@@ -1,15 +1,14 @@
-import React, { Component , createContext, useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import TickerSelect from "./assets/ticker.select.component";
 import Spot from "./assets/spot.component";
 import Depth from "./assets/depth.component";
 import Technicals from "./assets/technicals.component";
 import Wallet from "./assets/wallet.component";
-import {Tabs, Tab, Modal, Row, Button, Col, Form, Card, Container} from "react-bootstrap";
-import {SET_ALERT_OVERWRITE, SET_ALERT} from './types';
+import AssetList from "./asset-list.component";
+import { Tabs, Tab } from "react-bootstrap";
+import {SET_ALERT} from './types';
 import { AuthContext } from '../App';
-import Trade from "./assets/trade.component"
-
 
  const  ExchangeTradeForm = (props) => {
 // onTabSelect={onSelect} prev={prev} setTab={setKey} tab={key} exchange={props.exchange}
@@ -21,12 +20,12 @@ import Trade from "./assets/trade.component"
         console.log('onSelect',k)
         setOrderType(k)
     }
-        const { state, dispatch } = React.useContext(AuthContext);
+        const {  dispatch } = React.useContext(AuthContext);
         //const { state, dispatch, data, setData } = React.useContext(AuthContext);
         var ex = JSON.parse(localStorage.getItem('exchanges'))
 
         //console.log('TAB:',props.tab)
-        var prevTab = props.tab;
+        //var prevTab = props.tab;
         var thisExchange = ex.filter(exchange => 
             props.exchange.name === exchange.name
         )
@@ -43,6 +42,7 @@ import Trade from "./assets/trade.component"
             apiKey: thisExchange.length > 0 ? thisExchange[0].apiKey: '',
             url: props.exchange.url,
             tickers: [],
+            asset: [],
             amount: '',
             qty: '',
             lastPrice:'',
@@ -70,7 +70,7 @@ useEffect(() => {
         )
     }
 
-}, [props.tab]); 
+}, []); 
 
 useEffect(() => {
     if(data.price.length > 0 || data.qty.length > 0 || data.amount.length > 0 ){
@@ -89,7 +89,7 @@ useEffect(() => {
 
       axios.get(props.exchange.url+'/tickers').then(result => {
             
-        result.data.tickers.map((ticker,i) => {
+        result.data.tickers.forEach((ticker,i) => {
 
             result.data.tickers[i] = { value: ticker, label: ticker }
         })
@@ -153,7 +153,7 @@ console.log('OnChangeTicker', e)
         //       name: e.target.value
         //   });
         //console.log('MYWALLET',mywallet)
-        if(props.tab == 'buy'){
+        if(props.tab === 'buy'){
             asset = e.value.replace(/.*_/g,"");
             sellAsset = e.value.replace(/_.*/g,"");
         } else {
@@ -182,9 +182,9 @@ const onChangeName = e => {
         });
         
 }
-const tabEvent = e => {
-    console.log('TABEVENT',e)
-}
+// const tabEvent = e => {
+//     console.log('TABEVENT',e)
+// }
 const clearAmount = e => {
     setData(
         {...data,
@@ -195,7 +195,7 @@ const clearAmount = e => {
 }
 const onChangeAmount = e => {
     let qty, amount;
-    if(data.price.length < 1 && orderType == 'limit'){
+    if(data.price.length < 1 && orderType === 'limit'){
         dispatch({
             type: SET_ALERT,
             payload: {  message:'Please Choose a price before setting qty', alertType: 'success', timeout:3000}
@@ -203,17 +203,17 @@ const onChangeAmount = e => {
         return;
     }
 
-    if(props.tab == 'buy' && orderType == 'limit'){
+    if(props.tab === 'buy' && orderType === 'limit'){
          qty = Math.round(parseFloat(e.target.value) / parseFloat(data.price));
          amount = parseFloat(e.target.value).toFixed(2);
-    } else if(props.tab == 'sell' && orderType == 'limit') {
+    } else if(props.tab === 'sell' && orderType === 'limit') {
         qty = e.target.value ;
         amount = Math.round(parseFloat(e.target.value) * parseFloat(data.price));
         amount = amount.toFixed(2)
-    } else if(props.tab == 'buy' && orderType == 'market') {
+    } else if(props.tab === 'buy' && orderType === 'market') {
         amount = parseFloat(e.target.value).toFixed(2);
         qty = '';
-    } else if(props.tab == 'sell' && orderType == 'market'){
+    } else if(props.tab === 'sell' && orderType === 'market'){
         amount = parseFloat(e.target.value).toFixed(2);
         qty='';
     }
@@ -257,7 +257,7 @@ function onSubmit(e) {
        //console.log('RETURN FORM', data, props)
 return (       
     
-            <div className="container pl-0" style={{marginTop: '10px', marginLeft:'2px', marginRight:'2px'}}>
+            <div className="pl-0" style={{marginTop: '10px', marginLeft:'2px', marginRight:'2px'}}>
                 
                 <form className="form-row pb-0 mb-0" style={{width:'100%'}} onSubmit={onSubmit}>
                     <div className="form-group col-sm-6 mb-0"> 
@@ -267,6 +267,7 @@ return (
                                 value={data.name}
                                 onChange={onChangeName}
                                 />
+                    <h5 className="mt-9x">{props.exchange.name} </h5>
                     {/* <Spot onRef={ref => (spot = ref)} baseAsset={data.baseAsset}  exchange={props.exchange} clearTicker={clearTicker} selectedTicker={data.selectedTicker}  /> */}
                     <Technicals />
                     </div>
@@ -327,7 +328,7 @@ return (
                 <div className="form-group"> 
                         <label>Total</label>
                         <input  type="text"
-                                placeholder={ props.tab == 'buy' ? 'Total '+data.baseAsset : 'Total '+data.sellAsset}
+                                placeholder={ props.tab === 'buy' ? 'Total '+data.baseAsset : 'Total '+data.sellAsset}
                                 className="form-control"
                                 value={data.amount}
                                 onChange={onChangeQty}
@@ -347,15 +348,17 @@ return (
                 </Tab>
                 </Tabs>
                     
-                    <div className="form-group col-sm-12 pb-0 mb-0">
+                    <div className="form-group col-sm-12 pb-2 mb-0">
                         { props.tab ==='buy' ? <input type="submit" value="Place buy order" className="btn btn-success" /> :
                         <input type="submit" value="Place sell order" className="btn btn-danger" />
                     }
                     </div>
+                    <AssetList onChangePrice={onChangePrice} data={data} clearTicker={clearTicker} setData={setData} selectedTicker={data.selectedTicker} exchange={props.exchange} prevSelectedTicker={data.prevSelectedTicker}/>
                 </form>
-            {/* <div className="d-flex justify-content-between flex-wrap  align-items-center pb-2 mb-3 border-bottom">
-                <Trade exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
-            </div> */}
+            {/* <div className="d-flex justify-content-between flex-wrap  align-items-center pb-2 mb-3 border-bottom"> */}
+                {/* <Trade exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  /> */}
+               
+            {/* </div> */}
             </div>
         
         )

@@ -5,7 +5,68 @@
 input {
   min-width:149px;
 }
+.mt-9x {
+  margin-top: 9px;
+}
+.carousel-indicators-numbers li {
+  text-indent: 0;
+  margin: 0 10px;
+  width: 85px;
+  height: 20px;
+  border: none;
+  white-space: nowrap;
+  line-height: 26px;
+  color: #000;
+  background-color: white;
+  
+}
+.carousel-indicators-numbers li.active, .carousel-indicators-numbers li:hover {
+  border-bottom-width: 1px;
+  border: none;
+  border-bottom: black;
+  border-bottom-style: solid;
+  line-height: 26px;
+  background-color: white;
+}
 
+.carousel-indicators {
+  position: relative;
+}
+
+td {
+  line-height:1.0;
+  padding-bottom: 0px !important;
+}
+.fx-5 {
+  font-size: 5px;
+}
+.fx-6 {
+  font-size: 6px;
+}
+.fx-7 {
+  font-size: 7px;
+}
+.fx-8 {
+  font-size: 8px;
+}
+.fx-9 {
+  font-size: 9px;
+}
+.fx-10 {
+  font-size: 10px;
+}
+.fx-11 {
+  font-size: 11px;
+}
+.fx-12 {
+  font-size: 12px;
+}
+.fx-13 {
+  font-size: 13px;
+}
+.fx-14 {
+  font-size: 14px;
+}
 .react-select-container {
   width:180px;
 }
@@ -32,7 +93,7 @@ label {
   font-family: "DINRegular";
   font-size: 14px !important;
   font-weight: 400;
-  line-height: 12px;
+  line-height: 1.0;
   white-space: nowrap;
 }
 
@@ -40,7 +101,7 @@ label {
   font-family: "DINRegular";
   font-size: 16px !important;
   font-weight: 800;
-  line-height: 12px;
+  line-height: 1.0;
   white-space: nowrap;
 }
 

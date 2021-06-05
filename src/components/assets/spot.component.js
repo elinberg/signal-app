@@ -1,20 +1,19 @@
-import React, { Component, useEffect,useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from "react-router";
-import { AuthContext } from '../../App';
-import WebSocketConnection from './websocket';
-const _transform = require('./transformer')
-let count = 0;
-let prices = [];
-let gains = [];
-let losses = [];
+import WebSocketConnection from './spot.websocket';
+
+// let count = 0;
+// let prices = [];
+// let gains = [];
+// let losses = [];
 const Spot = props => {
-const { state, dispatch } = React.useContext(AuthContext); 
+//const { state, dispatch } = React.useContext(AuthContext); 
 const history = useHistory();
 const [intervalId, setIntervalId ] = useState('');
 const [ data, setData ]= useState( {})
 //const [ prices, setPrices ]= useState( [])
 //const [ prevPrice, setPrevPrice ]= useState('0.00')  ;    
-let [online, isOnline] = useState(navigator.onLine);
+let [isOnline] = useState(navigator.onLine);
 
 const setOnline = () => {
     console.log('We are online!');
@@ -91,7 +90,7 @@ useEffect(() => {
         //console.log('HANDLESTATE')
   const ex = JSON.parse(localStorage.getItem('exchanges'))
         //console.log('local', ex)
-const thisExchange = ex.filter(exchange => 
+   let thisExchange = ex.filter(exchange => 
             props.exchange.name === exchange.name
         )
         if(thisExchange){ 
@@ -116,8 +115,7 @@ const thisExchange = ex.filter(exchange =>
             prevPrice:'0.00' ,
             selectedTicker: '',
             prevSelectedTicker: props.selectedTicker,
-            tickerEndpoint: props.exchange.tickerEndpoint,
-            secret: thisExchange.length > 0 ? thisExchange[0].secret: '',
+            tickerEndpoint: props.exchange.tickerEndpoint
         });
 
         console.log('exchange' ,props.exchange,props);
@@ -129,20 +127,20 @@ const thisExchange = ex.filter(exchange =>
         if(localStorage.getItem('selectedTicker') === undefined){ 
             localStorage.setItem('selectedTicker',props.selectedTicker);
             msg = JSON.stringify({"op": "subscribe", "args":["spot/ticker:"+props.selectedTicker]});
-            console.log('ws_send1',props.selectedTicker)
+            //console.log('ws_send1',props.selectedTicker)
            // ws_send(msg);
         } else if(props.selectedTicker === localStorage.getItem('selectedTicker')){
-            console.log('ws_send2',props.selectedTicker)
+            //console.log('ws_send2',props.selectedTicker)
         } else if(props.selectedTicker !== localStorage.getItem('selectedTicker')){
             msg = JSON.stringify({"op": "unsubscribe", "args": ["spot/ticker:"+localStorage.getItem('selectedTicker')]});
-            console.log('ws_send3',props.selectedTicker)
+            //console.log('ws_send3',props.selectedTicker)
             //ws_send(msg);
             localStorage.setItem('selectedTicker',props.selectedTicker);
             msg = JSON.stringify({"op": "subscribe", "args":["spot/ticker:"+props.selectedTicker]});
-            console.log('ws_send4',props.selectedTicker)
+            //console.log('ws_send4',props.selectedTicker)
             //ws_send(msg);
         }
-        if(props.exchange.name == 'Binance'){
+        if(props.exchange.name === 'Binance'){
             //msg='';
         }
         let client = [];
@@ -162,7 +160,7 @@ const thisExchange = ex.filter(exchange =>
 
         let iid = setInterval(() =>{
             //console.log('READYSTATE1',client['Bitmart'].readyState)
-            if(client['Bitmart'].readyState == 1 ){
+            if(client['Bitmart'].readyState === 1 ){
                 //console.log('PINGING:','ping')
                 client['Bitmart'].send('ping');
                 //client['Bitmart'].send(msg);

@@ -1,19 +1,18 @@
-import React, { Component, useEffect,useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from "react-router";
-import { AuthContext } from '../../App';
 //import TradeFormContext from "../tradeFormContext"
 import TradeWebSocketConnection from './trade.websocket';
-const _transform = require('./transformer')
+
 
 const Trade = props => {
-const { state, dispatch } = React.useContext(AuthContext); 
+
 console.log('Trade', props)
 //const { state } = React.useContext(TradeFormContext); 
 const history = useHistory();
 const [intervalId, setIntervalId ] = useState('');
-const [ data, setData ]= useState( {})
+const [ data, setData ]= useState( props.data)
 //const [ prevPrice, setPrevPrice ]= useState('0.00')  ;    
-let [online, isOnline] = useState(navigator.onLine);
+let [isOnline] = useState(navigator.onLine);
 const setOnline = () => {
     console.log('We are online!');
     isOnline(true);
@@ -34,9 +33,9 @@ useEffect(() => {
     window.addEventListener('offline', setOffline);
     window.addEventListener('online', setOnline);
         //console.log('HANDLESTATE')
-  const ex = JSON.parse(localStorage.getItem('exchanges'))
+    const ex = JSON.parse(localStorage.getItem('exchanges'))
         //console.log('local', ex)
-const thisExchange = ex.filter(exchange => 
+    let thisExchange = ex.filter(exchange => 
             props.exchange.name === exchange.name
         )
         if(thisExchange){ 
@@ -54,14 +53,14 @@ const thisExchange = ex.filter(exchange =>
             url: props.exchange.url,
             asks:[],
             bids:[],
+            asset:props.data.asset,
             selectedTicker: '',
             prevSelectedTicker: props.selectedTicker,
-            tickerEndpoint: props.exchange.tickerEndpoint,
-            secret: thisExchange.length > 0 ? thisExchange[0].secret: '',
+            tickerEndpoint: props.exchange.tickerEndpoint
         });
 
         console.log('exchange' ,props.exchange,props);
-        if(props.selectedTicker.length < 3){
+        if( props.selectedTicker !== undefined && props.selectedTicker.length < 3){
             return;
         }
 
@@ -82,7 +81,7 @@ const thisExchange = ex.filter(exchange =>
             console.log('ws_send4',props.selectedTicker)
             //ws_send(msg);
         }
-        if(props.exchange.name == 'Binance'){
+        if(props.exchange.name === 'Binance'){
             //msg='';
         }
         let client = [];
@@ -108,13 +107,13 @@ const thisExchange = ex.filter(exchange =>
         msg = JSON.stringify({"op": "login", "args":[key,timestamp,signature]});
 
 
-        console.log('TRADE MSG', msg)
-        client[props.exchange.name] = new TradeWebSocketConnection(props,setData, data ,msg );
+        console.log('TRADE MSG', props,props.setData, data ,msg)
+        client[props.exchange.name] = new TradeWebSocketConnection(props,props.setData, data ,msg );
         
         //c//lient.push(ws);
         if(props.exchange.name === 'Bitmart'){
 
-            if(client['Bitmart'].readyState == 1 ){
+            if(client['Bitmart'].readyState === 1 ){
                 // {"op": "subscribe", "args": ["spot/user/order:BTC_ USDT"]}
                 msg = JSON.stringify({"op": "subscribe", "args":["spot/user/order:"+props.selectedTicker]});
                 client['Bitmart'].send(msg)
@@ -132,7 +131,7 @@ const thisExchange = ex.filter(exchange =>
 
         let iid = setInterval(() =>{
             //console.log('READYSTATE1',client['Bitmart'].readyState)
-            if(client['Bitmart'].readyState == 1 ){
+            if(client['Bitmart'].readyState === 1 ){
                 //console.log('PINGIN:','ping')
                 client['Bitmart'].send('ping');
                 //client['Bitmart'].send(msg);
@@ -194,10 +193,11 @@ const thisExchange = ex.filter(exchange =>
         //     return null;
         // }
         console.log('USER-TRADE',data)
-        if(data.asks === undefined){
+        if(data.asset !== undefined){
             return null;
         }
-        console.log('DEPTH',data)
+        console.log('TRADE',data)
+        return null;
         return (
             <div className="container" style={{marginTop: '2px', marginBottom: '2px', paddingLeft:'0px'}}>
                 

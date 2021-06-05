@@ -77,8 +77,8 @@ export default class CreateAsset extends Component {
 
     render() {
         return (
-            <div className="container" style={{marginTop: 10}}>
-                <h3>Create New Asset</h3>
+            <div style={{ marginLeft: '12px', minWidth:'400px' }} className="float-left pt-2">
+                <h5>Create New Asset</h5>
                 <form onSubmit={this.onSubmit}>
                     <div className="form-group"> 
                         <label>Pair: </label>

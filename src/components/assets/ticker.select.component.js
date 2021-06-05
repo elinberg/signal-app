@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import Select, {components} from "react-select";
+import React from 'react';
+import Select from "react-select";
 //import axios from 'axios';
 //var opts = [{ value: 'SHIB_USDT', label: 'SHIB_USDT' }]
 //props.options

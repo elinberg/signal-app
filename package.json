@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^12.8.3",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
+    "bootswatch": "^5.0.1",
     "class-utils": "^0.3.6",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",

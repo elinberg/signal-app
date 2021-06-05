@@ -1,11 +1,11 @@
 import React , {useEffect, useState} from 'react';
 import axios from 'axios';
 import { useHistory } from "react-router";
-import {SET_ALERT_OVERWRITE, SET_ALERT, LOGIN} from './types';
+import { SET_ALERT, LOGIN} from './types';
 
 import { AuthContext } from "../App";
 
-export const Login = () => {
+const Login = () => {
     const { dispatch } = React.useContext(AuthContext);
     const initialState = {
         username: "",
@@ -16,17 +16,17 @@ export const Login = () => {
       //localStorage.clear();
       const [data, setData] = React.useState(initialState);
       let history = useHistory();
-      let [online, isOnline] = useState(navigator.onLine);
+      let [online,isOnline] = useState(navigator.onLine);
       const setOnline = () => {
           console.log('We are online!');
-          let online=true;
+          
           isOnline(true);
       };
       const setOffline = () => {
           console.log('We are offline!');
           //props.selectedTicker='';
           //props.clearTicker();
-          let online=false;
+          
           isOnline(false);
       };
 
@@ -103,10 +103,10 @@ export const Login = () => {
     const search = window.location.search;
     const params = new URLSearchParams(search);
     const offline = params.get('offline');
-    if( offline == true ){
+    if( offline === true ){
         online = false;
     } else{
-        if(online == false){
+        if(online === false){
             online = false;
         } else {
             online = true;
