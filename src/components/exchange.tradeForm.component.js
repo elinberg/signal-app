@@ -9,6 +9,7 @@ import AssetList from "./asset-list.component";
 import { Tabs, Tab } from "react-bootstrap";
 import {SET_ALERT} from './types';
 import { AuthContext } from '../App';
+import { useHistory } from "react-router";
 
  const  ExchangeTradeForm = (props) => {
 // onTabSelect={onSelect} prev={prev} setTab={setKey} tab={key} exchange={props.exchange}
@@ -23,7 +24,7 @@ import { AuthContext } from '../App';
         const {  dispatch } = React.useContext(AuthContext);
         //const { state, dispatch, data, setData } = React.useContext(AuthContext);
         var ex = JSON.parse(localStorage.getItem('exchanges'))
-
+        let history = useHistory();
         //console.log('TAB:',props.tab)
         //var prevTab = props.tab;
         var thisExchange = ex.filter(exchange => 
@@ -36,7 +37,13 @@ import { AuthContext } from '../App';
                 apiKey: '',
                 secret: ''}];        
         }
-        
+        if(thisExchange[0] === undefined){
+            history.push('/exchanges')
+            dispatch({
+                type: SET_ALERT,
+                payload: {  message:'Configure your Exchanges by adding API Keys', alertType: 'success', timeout:3000}
+            })
+        }
         var initalState = {
             name: props.exchange.name,
             apiKey: thisExchange.length > 0 ? thisExchange[0].apiKey: '',
