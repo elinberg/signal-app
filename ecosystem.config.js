@@ -15,7 +15,7 @@ module.exports = {
       key: '~/.ssh/node.pem',
       ref  : 'origin/main',
       repo : 'git@github.com:elinberg/signal-app.git',
-      path : './',
+      path : '/home/node/signal-app',
       'pre-deploy-local': '',
       'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production',
       'pre-setup': ''
