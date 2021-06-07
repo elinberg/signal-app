@@ -131,7 +131,7 @@ const Login = () => {
                     <label>User Name: </label>
                     <input  type="text"
                             className="form-control"
-                            placeholder="username"
+                            placeholder="username or email"
                             autoComplete="username"
                             value={data.username}
                             onChange={onChangeUsername}
