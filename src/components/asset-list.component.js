@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import SocketFactory from './assets/socket.factory'
+import $ from 'jquery';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle";
-import $ from 'jquery';
 import Market from "./assets/market.component";
 import axios from 'axios';
 import Table from "react-bootstrap/Table";
