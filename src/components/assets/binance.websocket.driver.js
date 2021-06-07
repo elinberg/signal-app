@@ -4,7 +4,6 @@ const Decompress = require("./decompress").Decompress;
 const RobustWebSocket = require('robust-websocket');
 const _transform = require('./transformer')
 
-
 export default class BinanceWebSocket  {
     constructor(  url, config, props, credentials, trades){
 
