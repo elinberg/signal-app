@@ -13,7 +13,7 @@ module.exports = {
       host : 'signal',
       ref  : 'origin/main',
       repo : 'signal:signal-app.git',
-      path : './',
+      path : '~/signal-app',
       'pre-deploy-local': '',
       'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production',
       'pre-setup': ''
