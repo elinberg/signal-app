@@ -1,8 +1,9 @@
+import { fromEvent } from 'rxjs';
+import { filter } from 'rxjs/operators';
 const Decompress = require("./decompress").Decompress;
 const RobustWebSocket = require('robust-websocket');
 const _transform = require('./transformer')
-import { fromEvent } from 'rxjs';
-import { filter } from 'rxjs/operators';
+
 
 export default class BitmartWebSocket {
     constructor( url, config, props, credentials, trades){
@@ -136,7 +137,7 @@ export default class BitmartWebSocket {
                     //console.log('FILTERED', this.trades);
 
                 } else {
-                        orderId='-1'
+                        
                         this.trades.unshift(newTrade)
                         
                 }
