@@ -2,8 +2,13 @@ import React , {useEffect, useState} from 'react';
 import axios from 'axios';
 import { useHistory } from "react-router";
 import { SET_ALERT, LOGIN} from './types';
-
 import { AuthContext } from "../App";
+
+
+// State updates from the useState() and useReducer() Hooks don't support the " + 's
+// econd callback argument. To execute a side effect after ' + 'rendering, declare it in the component body with useEffect().'
+
+
 
 const Login = () => {
     const { dispatch } = React.useContext(AuthContext);
@@ -13,10 +18,15 @@ const Login = () => {
         isSubmitting: false,
         errorMessage: null
       };
-      //localStorage.clear();
       const [data, setData] = React.useState(initialState);
-      let history = useHistory();
       let [online,isOnline] = useState(navigator.onLine);
+      //localStorage.clear();
+    //   const [data, setData] = React.useState(initialState);
+       let history = useHistory();
+    //   let [online,isOnline] = useState(navigator.onLine);
+
+
+
       const setOnline = () => {
           console.log('We are online!');
           
@@ -46,12 +56,12 @@ const Login = () => {
     }
 
     useEffect(() => {
-        window.addEventListener('offline', setOffline);
-        window.addEventListener('online', setOnline);
+        //window.addEventListener('offline', setOffline);
+       // window.addEventListener('online', setOnline);
         return () => {
 
-            window.removeEventListener('offline', setOffline);
-            window.removeEventListener('online', setOnline);
+           // window.removeEventListener('offline', setOffline);
+           // window.removeEventListener('online', setOnline);
         }
     },[]);
     const onSubmit = e => {
@@ -103,15 +113,15 @@ const Login = () => {
     const search = window.location.search;
     const params = new URLSearchParams(search);
     const offline = params.get('offline');
-    if( offline === true ){
-        online = false;
-    } else{
-        if(online === false){
-            online = false;
-        } else {
-            online = true;
-        }
-    }
+    // if( offline === true ){
+    //     isOnline(false);
+    // } else{
+    //     if(online === false){
+    //         isOnline(false);
+    //     } else {
+    //         isOnline(true);
+    //     }
+    // }
     
     return (
         <div className="container" style={{marginTop: 10}}>

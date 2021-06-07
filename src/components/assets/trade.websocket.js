@@ -1,4 +1,4 @@
-const zlib = require("zlib");
+const Decompress = require("./decompress").Decompress;
 const RobustWebSocket = require('robust-websocket');
 const _transform = require('./transformer')
 //const prevPrice = '0.00';
@@ -67,15 +67,9 @@ const obj = Object.create(protoMethods);
          console.log('WebSocket Client Connected to ', props.exchange.name);
          
         
-        // let iid2 = setInterval(() =>{
-        //     //console.log('READYSTATE1',client['Bitmart'].readyState)
-        //     if(props.exchange.name == 'Bitmart'){
-        //         console.log('PINGING:','ping')
-        //         this.send('ping');
-        //         //client['Bitmart'].send(msg);
-        //     } 
-        // }, 15000);
         })
+
+        
     this.client.addEventListener('message', function(event) {
             // text frame
             //console.log('Binance TradeWSQQQQ',JSON.parse(event.data))
@@ -83,7 +77,7 @@ const obj = Object.create(protoMethods);
                 //this.send("ping")
                 return;
             }
-            console.log('message',event.data)
+           // console.log('message',event.data)
             
             if(event.data instanceof Blob ) {
 
@@ -101,96 +95,40 @@ const obj = Object.create(protoMethods);
     if(event.data instanceof Blob ) {
         if(props.exchange.name === 'Bitmart'){
         let transformer = new _transform(props.exchange.name);
+        let decompress = new Decompress();
         //console.log(event.data)
-        const stream = event.data.stream();
-        const reader = stream.getReader();
-        reader.read().then(({ done, value }) => {
-            if(done){
-                
-            } else {
-                var b = Buffer.from(value)
-                
-                zlib.inflateRaw(b,{flush: 3, info: true}, (err, buffer) => {
+        let json = decompress.unzip(event.data);
+        
+        if( json !== undefined && json.data !== undefined ){
+            console.log('pre pre pre Transform', json)
+            setData({
+                ...data,
+                asset:[]
+            })
+                console.log('pre pre Transform', json.data, trades)
 
-                var json = JSON.parse(buffer.toString('UTF-8'))
-
-                /////////////////////////
-                // let transformer = new _transform(props.exchange.name);
-                // try {
-                //     let json = JSON.parse(event.data);
-                //     if(json.e.length > 0 && json.e == 'executionReport'){
-                //         setData({
-                //             ...data,
-                //             asset:[]
-                //         })
-    
-                //         console.log('TRDATA1',json,data);
-    
-                //         let newTrade = transformer.getTradeStream(json,props.selectedTicker)
-                //         let orderId;
-                //         if(newTrade.state == 'CANCELED'){
-                //             orderId=newTrade.order_id
-                //             trades = trades.filter(trade => trade.order_id !== orderId)
-                //         } else {
-                //             orderId=='-1'
-                //             trades.unshift(newTrade)
-                //         }
-                            
-                //         console.log('TRDATA4', trades);
+                let newTrade = transformer.getTradeStream(json.data[0],props.selectedTicker)
+                let orderId;
+                if(newTrade.state === 'CANCELED'){
+                    orderId=newTrade.order_id
+                    trades = trades.filter(trade => trade.order_id !== orderId)
+                    console.log('FILTERED', trades);
+                    if(trades.length < 1){
                         
-                //         setData({
-                //             ...data,
-                //             asset:trades
-                //         })
-    
-                //     }
-    
-                // } catch(e){
-                //     console.log(e);
-                // }
-
-
-                //////////////////////////
-                console.log('pre pre pre pre undefined Transform', json)
-                if(json.data !== undefined && json.data.length > 0){
-                    console.log('pre pre pre Transform', json)
-                    setData({
-                        ...data,
-                        asset:[]
-                    })
-                        console.log('pre pre Transform', json.data, trades)
-
-                        let newTrade = transformer.getTradeStream(json.data[0],props.selectedTicker)
-                        let orderId;
-                        if(newTrade.state === 'CANCELED'){
-                            orderId=newTrade.order_id
-                            trades = trades.filter(trade => trade.order_id !== orderId)
-                            console.log('FILTERED', trades);
-                            if(trades.length < 1){
-                                
-                            }
-                        } else {
-                            orderId='-1'
-                            trades.unshift(newTrade)
-                        }
-                                     
-                    console.log('TRDATA4', trades);
-                    
-                    setData({
-                        ...data,
-                        asset:trades
-                    })
-
-
-                    
-                   
+                    }
+                } else {
+                    orderId='-1'
+                    trades.unshift(newTrade)
                 }
-                
-               
-                
-                }); 
-            }  
-        })
+                             
+            console.log('TRDATA4', trades);
+            
+            setData({
+                ...data,
+                asset:trades
+            })
+           
+        }
     } 
     } else {
             
@@ -252,6 +190,6 @@ const obj = Object.create(protoMethods);
         //console.log('we got: ' + event.data)
         })
 
-        return ({client:this.client,setData:this.setData,trades:this.trades});
+        return ({client:this.client});
      }
     }   

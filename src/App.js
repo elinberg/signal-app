@@ -10,7 +10,7 @@ import {v4 as uuid } from 'uuid';
 import { SET_ALERT, REMOVE_ALERT, LOGIN, LOGOUT, SET_ALERT_OVERWRITE} from "./components/types";
 
 
-export const AuthContext = React.createContext();
+//export const AuthContext = React.createContext();
 window.onbeforeunload = (event) => {
   const e = event || window.event;
   // Cancel the event
@@ -20,6 +20,8 @@ window.onbeforeunload = (event) => {
   }
   return ''; // Legacy method for cross browser support
 };
+
+export const AuthContext = React.createContext();
 const initialState = {
   isAuthenticated: false,
   isOpen: false,
@@ -34,6 +36,7 @@ const initialState = {
   selectedTicker:'',
   exchange: []
 };
+
 export const  initalData = {
   onTabSelect: {},
   prev: '',
@@ -140,6 +143,9 @@ const reducer = (state, action) => {
     //let nav;
     //window.$prevPrice = '0.00'
     //console.log('Store State',this.props.store.getState())
+
+
+  
     const [state, dispatch] = React.useReducer(reducer, initialState);
 
     const [data, setData] = React.useState(initalData);

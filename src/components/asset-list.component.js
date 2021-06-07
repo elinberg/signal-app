@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import TradeWebSocketConnection from './assets/trade.websocket';
+import SocketFactory from './assets/socket.factory'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle";
 import $ from 'jquery';
 import Market from "./assets/market.component";
 import axios from 'axios';
 import Table from "react-bootstrap/Table";
+import { fromEvent } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 const _transform = require('./assets/transformer');
 
@@ -142,29 +144,23 @@ const AssetList = props => {
             if(props.exchange.name === 'Binance'){
                 listenKey = response.data.listenKey;
                 console.log('LISTENKEY', listenKey);
-                if(listenKey === undefined){
-                    axios.get('/api/'+props.exchange.name+'/orders', {
-                        headers: {
-                        'xbmkey': key,
-                        'xbmname': apiName,
-                        'xbmsecret': secret
-                        }
-                    })
-                    .then(data => {
-                        listenKey = data.listenKey;
-                        console.log('GET LISTENKEY', data)
-                    })
-                    .catch(e => {
-                        console.log('LISTENKEY ERROR', e)
-                    })
-                }
-
-
             }
-            
+            console.log('Properties', props , {key:key,apiName:apiName,secret:secret} , mytrades, true)
             // props, listenKey, credentials, trades
-            client[props.exchange.name] = new TradeWebSocketConnection( props , listenKey, {key:key,apiName:apiName,secret:secret} , mytrades);
+            const config = { Bitmart: {name:'BitmartWebSocket', login:true, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', login:false, url:'wss://stream.binance.us:9443/ws/'+listenKey} };
             
+            client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name], props,{key:key,apiName:apiName,secret:secret}, mytrades);
+console.log('CLIENT ARRAY',client)
+            //client[props.exchange.name] = new WebSocket('wss://ws-manager-compress.bitmart.com?protocol=1.1', props , {key:key,apiName:apiName,secret:secret} , mytrades, true);
+            // if(props.exchange.name === 'Binance'){
+            //     let binanceMsg = fromEvent(client[props.exchange.name].client, 'message');
+            //     let  binanceMessages = binanceMsg.pipe(filter( event => JSON.parse(event.data).e === 'executionReport'));
+            //     binanceMessages.subscribe(ev=> console.log('Binance MESSAGE',JSON.parse(ev.data))); 
+            // }
+            
+            // fromEvent(client[props.exchange.name].client, 'open').subscribe((event) => console.log('Open Event', event));
+            // fromEvent(client[props.exchange.name].client, 'close').subscribe((event) => console.log('Close Event', event));
+
                 if(props.exchange.name === 'Bitmart'){
                     
                         // let smsg = JSON.stringify({"op": "subscribe", "args":["spot/user/order:"+props.selectedTicker]});
@@ -180,15 +176,15 @@ const AssetList = props => {
                         // }, 3000, cancelId);
     
                     
-                    let iid = setInterval(() =>{
-                        //console.log('READYSTATE1',client['Bitmart'].readyState)
-                        if(client['Bitmart'].client.readyState === 1 ){
-                            //console.log('PINGIN:','ping')
-                            client['Bitmart'].client.send('ping');
-                            //client['Bitmart'].send(msg);
-                        } 
-                    }, 6000);
-                    setIntervalId(iid);
+                    // let iid = setInterval(() =>{
+                    //     //console.log('READYSTATE1',client['Bitmart'].readyState)
+                    //     if(client['Bitmart'].client.readyState === 1 ){
+                    //         //console.log('PINGIN:','ping')
+                    //         client['Bitmart'].client.send('ping');
+                    //         //client['Bitmart'].send(msg);
+                    //     } 
+                    // }, 6000);
+                    // setIntervalId(iid);
                 }
     
                 
