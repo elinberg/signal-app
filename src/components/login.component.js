@@ -131,7 +131,7 @@ const Login = () => {
                     <label>User Name: </label>
                     <input  type="text"
                             className="form-control"
-                            placeholder="username or email"
+                            placeholder="Username or Email"
                             autoComplete="username"
                             value={data.username}
                             onChange={onChangeUsername}
@@ -141,7 +141,7 @@ const Login = () => {
                     <label>Password: </label>
                     <input 
                             type="password" 
-                            placeholder="password"
+                            placeholder="Password"
                             className="form-control"
                             value={data.password}
                             autoComplete="current-password"
