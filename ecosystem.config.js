@@ -2,6 +2,9 @@ module.exports = {
   apps : [{
     name:'signal-app',
     script: 'index.js',
+    env_production: {
+      NODE_ENV: "production",
+    },
     watch: '.'
   }],
   deploy : {
