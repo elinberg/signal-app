@@ -1,5 +1,6 @@
 module.exports = {
   apps : [{
+    name:'signal-app',
     script: 'index.js',
     watch: '.'
   }, {
