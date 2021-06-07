@@ -5,7 +5,7 @@ import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 export default class BitmartWebSocket {
-    constructor(  config, props, credentials, trades){
+    constructor( url, config, props, credentials, trades){
         console.log("BITMART PROPS", config, props, credentials, trades)
         let symbol = props.selectedTicker;
         this.client = new RobustWebSocket(config.url, null, {

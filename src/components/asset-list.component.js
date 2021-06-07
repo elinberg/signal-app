@@ -148,9 +148,9 @@ const AssetList = props => {
             console.log('Properties', props , {key:key,apiName:apiName,secret:secret} , mytrades, true)
             // props, listenKey, credentials, trades
             const config = { Bitmart: {name:'BitmartWebSocket', login:true, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', login:false, url:'wss://stream.binance.us:9443/ws/'+listenKey} };
-            
-            client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name], props,{key:key,apiName:apiName,secret:secret}, mytrades);
-console.log('CLIENT ARRAY',client)
+            let url = props.exchange.name === 'Bitmart' ? config[props.exchange.name].url : config[props.exchange.name].url + listenKey ;
+            client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name], url, props,{key:key,apiName:apiName,secret:secret}, mytrades);
+            //console.log('CLIENT ARRAY',client)
             //client[props.exchange.name] = new WebSocket('wss://ws-manager-compress.bitmart.com?protocol=1.1', props , {key:key,apiName:apiName,secret:secret} , mytrades, true);
             // if(props.exchange.name === 'Binance'){
             //     let binanceMsg = fromEvent(client[props.exchange.name].client, 'message');

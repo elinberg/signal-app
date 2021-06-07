@@ -2,6 +2,7 @@ import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle";
 import Chart from 'kaktana-react-lightweight-charts'
+
 //import { REMOVE_ALERT, SET_ALERT } from "../components/types";
 
 

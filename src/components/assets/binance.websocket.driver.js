@@ -6,7 +6,7 @@ import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 export default class BinanceWebSocket  {
-    constructor(  config, props, credentials, trades){
+    constructor(  url, config, props, credentials, trades){
 
         let symbol = props.selectedTicker;
         this.client = new RobustWebSocket(config.url, null, {
