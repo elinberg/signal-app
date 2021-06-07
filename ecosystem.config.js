@@ -3,11 +3,7 @@ module.exports = {
     name:'signal-app',
     script: 'index.js',
     watch: '.'
-  }, {
-    script: './service-worker/',
-    watch: ['./service-worker']
   }],
-
   deploy : {
     production : {
       user : 'node',
