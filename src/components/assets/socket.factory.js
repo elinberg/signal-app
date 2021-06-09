@@ -6,10 +6,10 @@ const ELEMENTS = {
 };
 
 export default class SocketFactory {
-    static createInstance(config, url, props,credentials,trades) {
-        console.log('createInstance',config, props,credentials,trades)
+    static createInstance(config, props,credentials,trades, endpoint, callback) {
+        console.log('createInstance',config, props,credentials,trades,endpoint)
         const socketCreator = ELEMENTS[config.name];
-        const socket = socketCreator ? new socketCreator(config, url, props,credentials,trades) : null;
+        const socket = socketCreator ? new socketCreator(config, props,credentials,trades,endpoint, callback) : null;
 
         return socket;
     }

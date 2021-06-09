@@ -275,12 +275,12 @@ return (
                                 onChange={onChangeName}
                                 />
                     <h5 className="mt-9x">{props.exchange.name} </h5>
-                    {/* <Spot onRef={ref => (spot = ref)} baseAsset={data.baseAsset}  exchange={props.exchange} clearTicker={clearTicker} selectedTicker={data.selectedTicker}  /> */}
-                    <Technicals />
+                    
+                    {/* <Technicals /> */}
                     </div>
                     <div className="form-group col-sm-6 mb-0"> 
                     
-                    <Spot onChangePrice={onChangePrice} clearTicker={clearTicker}  baseAsset={data.baseAsset}  exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
+                    <Spot onChangePrice={onChangePrice}  exchange={props.exchange} selectedTicker={data.selectedTicker}  />
                     
                     </div>
 

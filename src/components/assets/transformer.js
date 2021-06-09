@@ -54,7 +54,7 @@ class Transformer {
       if(json === undefined){
         return [];
       }
-      console.log('getTrades',json);
+      //console.log('getTrades',json);
 
           if(this.name === 'Bitmart'){
             
@@ -122,7 +122,7 @@ class Transformer {
       }
 
     getStream( json, symbol, prevPrices) {
-    //console.log('GETSTREAM',this.name,json, symbol);
+    //console.log('GETSTREAM BEFORE',this.name,json, symbol, prevPrices);
       var transformed = {};
       var len = prevPrices.length;
       var priceStyle = '';
@@ -150,7 +150,7 @@ class Transformer {
         };
 
 
-
+      //  console.log('GETSTREAM AFTER',this.name,transformed, symbol, prevPrices);
           return transformed;
         }
         if(this.name === 'Binance'){
@@ -185,7 +185,7 @@ class Transformer {
           if(this.name === 'Bitmart'){
 
            
-            console.log('Pre Transform', trade)
+           // console.log('Pre Transform', trade)
             // if(trade.cost !== undefined && trade.cost.length > 0){
             //   return trade;
             // }
@@ -256,8 +256,8 @@ class Transformer {
 
             transformed = {
               order_id: parseInt(trade.order_id),
-              avg_price: (trade.price !== undefined && trade.price.length > 0) ? trade.price.match(/.*[1-9]/gm)[0] : '', 
-              price: (trade.price !== undefined && trade.price.length > 0) ? trade.price.match(/.*[1-9]/gm)[0] : '',
+              avg_price: (trade.price !== undefined && trade.price !== null && trade.price.length > 0) ? trade.price.match(/.*[1-9]/gm)[0] : '', 
+              price: (trade.price !== undefined && trade.price !== null && trade.price.length > 0) ? trade.price.match(/.*[1-9]/gm)[0] : '',
               pair: trade.symbol.replace('_', '/'),
               side: trade.side,
               qty: parseFloat(trade.size).toFixed(2),
@@ -269,7 +269,7 @@ class Transformer {
               state: state
             }
   
-            console.log('Post Transform', transformed)
+           // console.log('Post Transform', transformed)
   
             return transformed;
           }
@@ -309,7 +309,7 @@ class Transformer {
           //     "Y": "0.0000",
           //     "Q": "0.0000"
           // }
-            console.log('Pre Transform Binance', trade)
+            //console.log('Pre Transform Binance', trade)
             if(trade.create_time !== undefined && trade.create_time.length > 0){
               return trade;
             }
@@ -344,7 +344,7 @@ class Transformer {
               state: (trade.x !== undefined) ? trade.x : ''
             }
 
-            console.log('POST Transform Binance', transformed)
+            //console.log('POST Transform Binance', transformed)
 
             return transformed ;
           }

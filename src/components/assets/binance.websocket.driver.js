@@ -1,14 +1,14 @@
 import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
-const Decompress = require("./decompress").Decompress;
 const RobustWebSocket = require('robust-websocket');
 const _transform = require('./transformer')
 
 export default class BinanceWebSocket  {
-    constructor(  url, config, props, credentials, trades){
+    constructor(  config, props, credentials, trades, endpoint, callback){
 
-        let symbol = props.selectedTicker;
-        this.client = new RobustWebSocket(config.url, null, {
+        let symbol = props.selectedTicker.replace(/_/g,"").toLowerCase();
+        console.log('connecting to',config.url+endpoint, symbol)
+        this.client = new RobustWebSocket(config.url+endpoint, null, {
             timeout: 600000,
             shouldReconnect: function(event, ws) {
                 console.log('Reconnecting')
@@ -18,11 +18,15 @@ export default class BinanceWebSocket  {
             }
         ) 
         this.name = 'Binance';
+        this.symbolRaw = props.selectedTicker || 'DOGE_USDT'
+        this.component = config.component;
         this.login = config.login || false;
         this.trades = trades || [] ;
+        this.prevPrices = trades;
+        this.callback = callback || {}
         this.ping_id = 0 ;
         this.ping_time = 1000000
-        this.symbol =  props.selectedTicker || 'DOGEUSDT';
+        this.symbol =  symbol|| 'DOGEUSDT';
         this.url = config.url || 'wss://stream.binance.us:9443/ws/';
         this.client.binaryType = 'blob'; //blob / text
         this.pingIn =  'ping';
@@ -31,12 +35,11 @@ export default class BinanceWebSocket  {
         this.unsubscribeMessage = this.getUnsubscribeMessage(symbol);
         //this.loginMessage = this.getLoginMessage(symbol);
         this.transformer =  new _transform(this.name);
-        this.decompress =  new Decompress(); //decompression class
         this.key = credentials.key;
         this.secret = credentials.secret;
         this.apiName = credentials.apiName;
         this.client.addEventListener('open', function(event){
-            console.log("RAW OPEN S B O", typeof event.data, event )
+            console.log("RAW OPEN S B O",  event )
         });
         this.client.addEventListener('close', function(event){});
         this.client.addEventListener('message', function(event){
@@ -46,14 +49,26 @@ export default class BinanceWebSocket  {
         this.messageEvent = fromEvent(this.client, 'message');
 
 
-        this.loginEvent = this.messageEvent
+        this.listenEvent = this.messageEvent
         .pipe(filter( event =>  typeof event.data === 'string'))
         .pipe(filter( event =>  event.data !== this.pingIn    ))
-        .pipe(filter( event =>  JSON.parse(event.data).event === 'login'));
-        this.loginEvent.subscribe(ev=> {
-            //console.log('LOGIN EVENT MESSAGE',JSON.parse(ev.data).event)
+        .pipe(filter( event =>  JSON.parse(event.data).e !== 'executionReport'));
+        this.listenEvent.subscribe(ev=> {
+        //console.log('LISTEN EVENT MESSAGE',JSON.parse(ev.data))
             //let msg = this.getSubscribeMessage(symbol)
            // this.client.send(msg);
+           let json = JSON.parse(ev.data)
+         if(this.component === 'ticker'){
+            //console.log('SPOT SET')
+            
+            this.setSpotData(json);
+        } else  if(this.component === 'depth'){
+            //console.log('DEPTH SET')
+            this.setDepthData(json);
+        } else  if(this.component === 'market'){
+            //console.log('MARKET SET')
+            this.setMarketData(json);
+        }
         }); 
 
         this.blobEvent = this.messageEvent
@@ -63,7 +78,8 @@ export default class BinanceWebSocket  {
            // console.log('BLOB EVENT MESSAGE', ev.data)
             let json = JSON.parse(ev.data) ;
             
-                this.setOpenOrders(json, props);
+            this.setOpenOrders(json);
+            
                
         })
             
@@ -78,23 +94,7 @@ export default class BinanceWebSocket  {
             this.client.send(this.pingOut);
         }); 
         
-        this.openEvent = fromEvent(this.client, 'open').subscribe((event) => {
-           // console.log('OPEN EVENT', event)
-            
-            if(this.login){
-                //let msg = this.getLoginMessage(credentials.key,credentials.secret,credentials.apiName)
-                //console.log('LoginMessage', msg)
-                //this.client.send(msg)
-            } else {
-                //let msg = this.getSubscribeMessage(symbol)
-                //this.client.send(msg);
-            }
-            
-
-            
-
         
-        });
         this.closeEvent = fromEvent(this.client, 'close').subscribe((event) => {
            // console.log('CLOSE EVENT', event)
             clearInterval(this.ping_id)
@@ -102,37 +102,89 @@ export default class BinanceWebSocket  {
 
         }
 
-        setOpenOrders (json, props){
-           // console.log('setOpenOrders', json, props)
+        setOpenOrders (json){
            
-           console.log('setOpenOrders', Array.isArray(json), typeof json)
+           
+           //console.log('setOpenOrders', Array.isArray(json), typeof json)
             if( json !== undefined || ! Array.isArray(json) ){
                 
-                //console.log('pre pre pre Transform', json)
-                props.setData({
-                    ...props.data,
-                    asset:[]
-                })
-                 //console.log('pre pre Transform', json.data)
+                
+                 //console.log('pre pre Transform', json)
                 
                 let newTrade = this.transformer.getTradeStream(json,this.symbol)
                 if(newTrade.state === 'CANCELED'){
-                    //console.log('PRE FILTERED', this.trades);
                     this.trades = this.trades.filter(trade => trade.order_id !== newTrade.order_id)
-                    //console.log('FILTERED', this.trades);
-
                 } else {
                         
                         this.trades.unshift(newTrade)
                         
                 }
                             
-                    //console.log('TRDATA4', this.trades);
+                    this.callback(this.trades)
                     
-                props.setData({
-                    ...props.data,
-                    asset:this.trades
-                })
+        
+            }
+        }
+
+
+        setSpotData (json){
+            
+            if(  json !== undefined  ){
+                
+                
+                let newState = this.transformer.getStream(json,this.symbolRaw,this.prevPrices);
+                 
+                
+                this.callback(newState);
+                this.prevPrices.push(newState.lastPrice );
+
+                if(this.prevPrices.length > 2){
+                    this.prevPrices.splice(0,1);
+                }
+        
+            }
+        } 
+        setDepthData (json){
+            
+           
+            
+            if(  json !== undefined  ){
+                
+                //console.log('pre pre pre Transform', json)
+                //let json = JSON.parse();
+                 
+                
+                this.callback(json);
+               
+        
+            }
+        }
+
+        setMarketData (json){
+            
+           
+            //console.log('setMarketData', json)
+            if(  json !== undefined  ){
+                
+                let len = this.prevPrices.length
+                let side = '';
+                if(parseFloat(this.prevPrices[len-1]) > parseFloat(json.p)){
+                    side = 'sell';
+                } else {
+                    side = 'buy';
+                } 
+
+                this.callback({price: json.p, size:json.q, side:side})
+
+                
+            this.prevPrices.push(json.p );
+
+            if(this.prevPrices.length > 2){
+                this.prevPrices.splice(0,1);
+            }
+                
+                
+               
         
             }
         }
@@ -151,15 +203,31 @@ export default class BinanceWebSocket  {
         }
 
         getSubscribeMessage (symbol) {
-            console.log('getSubscribeMessage', symbol )
-            this.symbol = symbol;
-            return JSON.stringify({"op": "subscribe", "args":["spot/user/order:"+symbol]});
+           // console.log('getSubscribeMessage', symbol )
+            
+            return '';
         }
 
         getUnsubscribeMessage (symbol) {
-            console.log('getUnSubscribeMessage', symbol )
+            //console.log('getUnSubscribeMessage', symbol )
             
-            return JSON.stringify({"op": "unsubscribe", "args":["spot/user/order:"+symbol]});
+            return '';
+        }
+
+
+        close(){
+            let id = setInterval(() => {
+               // console.log('READYSTATE', this.client.readyState, this.component)
+                if(this.client.readyState === 3){
+                    clearInterval(id)
+                } else if(this.client.readyState === 1){
+                    
+                    this.client.close();
+                    clearInterval(id)
+                } else {
+                    clearInterval(id)
+                }
+            }, 1000);
         }
     
     

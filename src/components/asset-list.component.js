@@ -6,8 +6,7 @@ import "bootstrap/dist/js/bootstrap.bundle";
 import Market from "./assets/market.component";
 import axios from 'axios';
 import Table from "react-bootstrap/Table";
-import { fromEvent } from 'rxjs';
-import { filter } from 'rxjs/operators';
+
 
 const _transform = require('./assets/transformer');
 
@@ -68,8 +67,8 @@ const AssetList = props => {
 //export default className AssetList extends Component {
     const [intervalId, setIntervalId ] = useState('');
     const [history, setHistory ] = useState({asset:[]});
-   
-    let [isOnline] = useState(navigator.onLine);
+    const [data, setData ] = useState({asset:[]});
+    
     let [ orderTab, setOrderTab ] = useState(0);
     
     // constructor(props) {
@@ -114,8 +113,8 @@ const AssetList = props => {
         console.log('CREDS',key,apiName,secret)
     
         let client = [];
-        props.setData({
-            ...props.data,
+        setData({
+            ...data,
             asset: []
         });
     
@@ -135,85 +134,42 @@ const AssetList = props => {
             mytrades = transformer.getTrades(response.data.trades,props.selectedTicker)
             /////////
             
-            props.setData({
-            ...props.data,
-            asset: mytrades,
-            
+            setData({
+                ...data,
+                asset:mytrades
             });
     
             if(props.exchange.name === 'Binance'){
                 listenKey = response.data.listenKey;
                 console.log('LISTENKEY', listenKey);
+            } else {
+                listenKey = '';
             }
-            console.log('Properties', props , {key:key,apiName:apiName,secret:secret} , mytrades, true)
-            // props, listenKey, credentials, trades
-            const config = { Bitmart: {name:'BitmartWebSocket', login:true, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', login:false, url:'wss://stream.binance.us:9443/ws/'+listenKey} };
-            let url = props.exchange.name === 'Bitmart' ? config[props.exchange.name].url : config[props.exchange.name].url + listenKey ;
-            client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name], url, props,{key:key,apiName:apiName,secret:secret}, mytrades);
-            //console.log('CLIENT ARRAY',client)
-            //client[props.exchange.name] = new WebSocket('wss://ws-manager-compress.bitmart.com?protocol=1.1', props , {key:key,apiName:apiName,secret:secret} , mytrades, true);
-            // if(props.exchange.name === 'Binance'){
-            //     let binanceMsg = fromEvent(client[props.exchange.name].client, 'message');
-            //     let  binanceMessages = binanceMsg.pipe(filter( event => JSON.parse(event.data).e === 'executionReport'));
-            //     binanceMessages.subscribe(ev=> console.log('Binance MESSAGE',JSON.parse(ev.data))); 
-            // }
-            
-            // fromEvent(client[props.exchange.name].client, 'open').subscribe((event) => console.log('Open Event', event));
-            // fromEvent(client[props.exchange.name].client, 'close').subscribe((event) => console.log('Close Event', event));
-
-                if(props.exchange.name === 'Bitmart'){
-                    
-                        // let smsg = JSON.stringify({"op": "subscribe", "args":["spot/user/order:"+props.selectedTicker]});
-                        // client['Bitmart'].client.send(smsg)
-                        // let cancelId = setInterval(() =>{
-                        //     console.log('ReadyState:', client['Bitmart'].client.readyState, msg)
-                        //     if(client['Bitmart'].client.readyState == 1 ){
-                        //         console.log('Logging In:', msg)
-                        //         client['Bitmart'].client.send(msg);
-                        //         clearInterval(cancelId);
-                                
-                        //     } 
-                        // }, 3000, cancelId);
-    
-                    
-                    // let iid = setInterval(() =>{
-                    //     //console.log('READYSTATE1',client['Bitmart'].readyState)
-                    //     if(client['Bitmart'].client.readyState === 1 ){
-                    //         //console.log('PINGIN:','ping')
-                    //         client['Bitmart'].client.send('ping');
-                    //         //client['Bitmart'].send(msg);
-                    //     } 
-                    // }, 6000);
-                    // setIntervalId(iid);
-                }
+           
+            const config = { Bitmart: {name:'BitmartWebSocket', component:'orders', login:true, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', component:'orders', login:false, url:'wss://stream.binance.us:9443/ws/'} };
+      
+            console.log('Properties',  props , {key:key,apiName:apiName,secret:secret} , mytrades, config)
+            client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name],  props,{key:key,apiName:apiName,secret:secret}, mytrades, listenKey, (orders) => {
+           
+                setData({
+                    ...data,
+                    asset:orders
+                });
+                //console.log('CALLBACK DATA', spot);
+            });
     
                 
         }).catch(function (error){
             console.log(error);
         })
         return () => {
-            // props.setData({
-            //     ...props.data,
-            //     asset: []
-            // });
-            window.removeEventListener('offline', setOffline);
-            window.removeEventListener('online', setOnline);
-            //setData({});
             
+            setData({
+                ...data,
+                asset:[]
+            });
             
-            
-            localStorage.setItem('selectedTicker', '');
-           // var unSubscribe = ["btcusd@miniTicker","ethusd@miniTicker","bnbusd@miniTicker","aadausd@miniTicker","adausd@miniTicker","dogeusdt@miniTicker", "enjusd@miniTicker", "maticusd@miniTicker", "eosusd@miniTicker", "vthousdt@miniTicker", "uniusdt@miniTicker"]
-            
-            
-            if(client['Bitmart'] !== undefined){
-                //client.send(msg)
-                clearInterval(intervalId)
-            client['Bitmart'].client.close();
-            }
-            if( client['Binance'] !== undefined ){
-                //client['Binance'].client.close();
-            }
+            client[props.exchange.name].close()
     
             
             console.log('Leaving');
@@ -230,17 +186,7 @@ if(props.data === undefined || props.data.asset === undefined || props.selectedT
 }
     
     
-    const setOnline = () => {
-        console.log('We are online!');
-        isOnline(true);
-    };
-    const setOffline = () => {
-        console.log('We are offline!');
-        //props.selectedTicker='';
-        //props.clearTicker();
-        history.push('/login?offline=true')
-        isOnline(false);
-    };  
+    
       //let history = useHistory();
      
 const getOrderHistory = () => {

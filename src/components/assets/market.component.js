@@ -1,33 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from "react-router";
-import MarketWebSocketConnection from './market.websocket';
+import SocketFactory from './socket.factory';
 
 const Market = props => {
 const history = useHistory();
 const [intervalId, setIntervalId ] = useState('');
+
 const [ data, setData ]= useState( {})
 //const [ prevPrice, setPrevPrice ]= useState('0.00')  ;    
-let [isOnline] = useState(navigator.onLine);
-const setOnline = () => {
-    console.log('We are online!');
-    isOnline(true);
-};
-const setOffline = () => {
-    console.log('We are offline!');
-    //props.selectedTicker='';
-    //props.clearTicker();
-    history.push('/login?offline=true')
-    isOnline(false);
-};  
+
 const onPriceClick = e => {
     console.log('Price Click', e.target.innerText);
     let event = {target:{value:e.target.innerText}}
     props.onChangePrice(event);
 }
 useEffect(() => {
-    window.addEventListener('offline', setOffline);
-    window.addEventListener('online', setOnline);
-        //console.log('HANDLESTATE')
+   
   const ex = JSON.parse(localStorage.getItem('exchanges'))
         //console.log('local', ex)
   let thisExchange = ex.filter(exchange => 
@@ -42,16 +30,9 @@ useEffect(() => {
         }
 
         setData({
-            name: props.exchange.name,
-            apiKey: thisExchange.length > 0 ? thisExchange[0].apiKey: '',
-            secret: thisExchange.length > 0 ? thisExchange[0].secret: '',
-            url: props.exchange.url,
-            asks:[],
-            bids:[],
+            
             market:[],
-            selectedTicker: '',
-            prevSelectedTicker: props.selectedTicker,
-            tickerEndpoint: props.exchange.tickerEndpoint
+            
         });
 
         //console.log('exchange' ,props.exchange,props);
@@ -59,84 +40,44 @@ useEffect(() => {
             return;
         }
 
-        let msg = '';
-        if(localStorage.getItem('selectedTicker') === undefined){ 
-            localStorage.setItem('selectedTicker',props.selectedTicker);
-            msg = JSON.stringify({"op": "subscribe", "args":["spot/depth5:"+props.selectedTicker]});
-            //console.log('ws_send1',props.selectedTicker)
-           // ws_send(msg);
-        } else if(props.selectedTicker === localStorage.getItem('selectedTicker')){
-            //console.log('ws_send2',props.selectedTicker)
-        } else if(props.selectedTicker !== localStorage.getItem('selectedTicker')){
-            msg = JSON.stringify({"op": "unsubscribe", "args": ["spot/depth5:"+localStorage.getItem('selectedTicker')]});
-            //console.log('ws_send3',props.selectedTicker)
-            //ws_send(msg);
-            localStorage.setItem('selectedTicker',props.selectedTicker);
-            msg = JSON.stringify({"op": "subscribe", "args":["spot/depth5:"+props.selectedTicker]});
-            //console.log('ws_send4',props.selectedTicker)
-            //ws_send(msg);
-        }
-        if(props.exchange.name === 'Binance'){
-            //msg='';
-        }
+ 
         let client = [];
-        msg = JSON.stringify({"op": "subscribe", "args":["spot/trade:"+props.selectedTicker]});
-        //console.log('DEPTH MSG', msg)
-        client[props.exchange.name] = new MarketWebSocketConnection(props,setData, data ,msg );
+        let msg ='';
+        if(props.exchange.name === 'Binance'){
+            msg=props.selectedTicker.replace(/_/g,"").toLowerCase()+'@aggTrade';
+        }
         
-        //c//lient.push(ws);
-        if(props.exchange.name === 'Bitmart'){
+        const config = { Bitmart: {name:'BitmartWebSocket', component:'market', login:false, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', component:'market', login:false, url:'wss://stream.binance.us:9443/ws/'} };
+        client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name],  props,{key:'',apiName:'',secret:''}, [], msg , (market) => {
+           
+            
+            data.market.unshift(market)
+
+                if(data.market.length > 9){
+                    data.market.splice(9,1);
+                }
+                //console.log('MarketWS', newState)
+
+                setData({
+                    ...data,
+                    
+                })
+        
 
            
+        });
 
-        // let iid = setInterval(() =>{
-            
-        //     if(client['Bitmart'].readyState == 1){
-        //         //console.log('DEPTH SENDING:',msg)
-        //         client['Bitmart'].send(msg);
-        //         clearInterval(iid)
-        //     }
-        // }, 500);
-        // console.log('DEPTH SENT:',msg)
 
-        let iid = setInterval(() =>{
-            //console.log('READYSTATE1',client['Bitmart'].readyState)
-            if(client['Bitmart'].readyState === 1 ){
-                //console.log('PINGIN:','ping')
-                client['Bitmart'].send('ping');
-                //client['Bitmart'].send(msg);
-            } 
-        }, 15000);
-        setIntervalId(iid);
-
-        }
-
-        
-        //console.log('CLIENT', client);
-      
         return () => {
-
-            window.removeEventListener('offline', setOffline);
-            window.removeEventListener('online', setOnline);
-            setData({});
-            let msg = JSON.stringify({"op": "unsubscribe", "args": ["spot/trade:"+localStorage.getItem('selectedTicker')]});
+            data.market.splice(0,9)
+            setData({
+                ...data,
+                
+            });
+    
+            client[props.exchange.name].close()
             
-            
-            localStorage.setItem('selectedTicker', '');
-            //var unSubscribe = ["btcusd@miniTicker","ethusd@miniTicker","bnbusd@miniTicker","aadausd@miniTicker","adausd@miniTicker","dogeusdt@miniTicker", "enjusd@miniTicker", "maticusd@miniTicker", "eosusd@miniTicker", "vthousdt@miniTicker", "uniusdt@miniTicker"]
-            
-            //send unsubscrube message here
-            //client.send(msg)
-            if(client['Bitmart']){
-                //client.send(msg)
-                clearInterval(intervalId)
-            client['Bitmart'].close();
-            }
-            if(client['Binance']){
-                client['Binance'].close();
-            }
-
-            
+     
             console.log('Leaving', msg);
         }
 
@@ -144,9 +85,7 @@ useEffect(() => {
         if(data.market === undefined){
             return null;
         }
-        if(data.bids === undefined){
-            return null;
-        }
+        
         //console.log('MARKET',data)
         let sideClass = '';
         return (

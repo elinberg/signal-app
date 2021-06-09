@@ -1,14 +1,15 @@
-import { fromEvent } from 'rxjs';
+import { fromEvent, throwError } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { callbackify } from 'util';
 const Decompress = require("./decompress").Decompress;
 const RobustWebSocket = require('robust-websocket');
 const _transform = require('./transformer')
 
 export default class BitmartWebSocket {
-    constructor( url, config, props, credentials, trades){
-        console.log("BITMART PROPS", config, props, credentials, trades)
+    constructor(  config, props, credentials, trades, endpoint, callback){
+        //console.log("BITMART PROPS", config, props, credentials, trades)
         let symbol = props.selectedTicker;
-        this.client = new RobustWebSocket(config.url, null, {
+        this.client = new RobustWebSocket( config.url, null, {
             timeout: 600000,
             shouldReconnect: function(event, ws) {
                 console.log('Reconnecting')
@@ -17,9 +18,12 @@ export default class BitmartWebSocket {
             }
             }
         ) 
+        this.component = config.component || 'orders'
         this.name = 'Bitmart';
+        this.callback = callback;
         this.login = config.login || false;
         this.trades = trades ;
+        this.prevPrices = trades
         this.ping_id = 0 ;
         this.ping_time = 10000
         this.symbol =  props.selectedTicker || 'SHIB_USDT';
@@ -34,12 +38,53 @@ export default class BitmartWebSocket {
         this.key = credentials.key;
         this.secret = credentials.secret;
         this.apiName = credentials.apiName;
-        this.client.addEventListener('open', function(event){
+        if(this.component === 'ticker') this.client.addEventListener('open', function(event){
+            //console.log("RAW OPEN SPOT S B O", this.component, event);
+            
         });
-        this.client.addEventListener('close', function(event){});
-        this.client.addEventListener('message', function(event){
-            //console.log("RAW MESSAGE EVENT S B O", typeof event.data, event.data, event )
+        if(this.component === 'depth') this.client.addEventListener('open', function(event){
+            //console.log("RAW OPEN DEPTH S B O", this.component, event);
+            
         });
+        if(this.component === 'ticker') this.client.addEventListener('close', function(event){
+            //console.log("RAW CLOSE SPOT S B O", this.component, event);
+            
+        });
+        if(this.component === 'depth') this.client.addEventListener('close', function(event){
+            //console.log("RAW CLOSE SPOT S B O", this.component, event);
+            
+        });
+        if(this.component === 'orders') this.client.addEventListener('open', function(event){
+            //console.log("RAW OPEN ORDERS S B O", this.component, event);
+        });
+        this.client.addEventListener('close', function(event){
+
+        });
+        let comp = this.component
+        
+        if(this.component === 'ticker') this.client.addEventListener('message', function(event){
+           
+             //console.log(" RAW MESSAGE SPOT S B O ", typeof event.data, event.data, event )
+        
+        });
+
+        if(this.component === 'market') this.client.addEventListener('message', function(event){
+           
+            //console.log(" RAW MESSAGE MARKET S B O ", typeof event.data, event.data, event )
+       
+       });
+
+        if(this.component === 'depth') this.client.addEventListener('message', function(event){
+           
+            //console.log(" RAW MESSAGE DEPTH S B O ", typeof event.data, event.data, event )
+       
+       });
+
+        if(this.component === 'orders') this.client.addEventListener('message', function(event){
+           
+            //console.log(" RAW MESSAGE ORDERS S B O ", typeof event.data, event.data, event )
+       
+       });
        
         this.messageEvent = fromEvent(this.client, 'message');
 
@@ -59,11 +104,26 @@ export default class BitmartWebSocket {
             //console.log('BLOB EVENT MESSAGE', ev.data)
             let json = ev.data;
             let unzipped;
-            this.decompress.unzip(json,(err,buffer) => {
-                
+            this.decompress.unzip(json,(err, buffer) => {
+                        if(buffer === undefined){
+                            return ;
+                        }
                 json =  JSON.parse(buffer.toString('UTF-8'));
-                this.setOpenOrders(json, props);
-               // console.log('BLOB EVENT CALLBACK', json)
+                //console.log('UNZIP EVENT MESSAGE', json)
+                if(this.component === 'orders'){
+                    //console.log('ORDERS SET')
+                    this.setOpenOrders(json, props);
+                } else  if(this.component === 'ticker'){
+                    //console.log('SPOT SET')
+                    this.setSpotData(json);
+                } else  if(this.component === 'depth'){
+                    //console.log('DEPTH SET')
+                    this.setDepthData(json);
+                } else  if(this.component === 'market'){
+                    //console.log('DEPTH SET')
+                    this.setMarketData(json);
+                }
+                //console.log('BLOB EVENT CALLBACK', json)
             })
             
             //console.log('BLOB EVENT UNZIPPED',json)
@@ -77,16 +137,17 @@ export default class BitmartWebSocket {
         }); 
         
         this.openEvent = fromEvent(this.client, 'open').subscribe((event) => {
-            console.log('OPEN EVENT', event)
+            //console.log('OPEN EVENT', event)
             
             if(this.login){
                 let msg = this.getLoginMessage(credentials.key,credentials.secret,credentials.apiName)
-                console.log('LoginMessage', msg)
+                //console.log('LoginMessage', msg)
                 this.client.send(msg)
             } else {
-
+                //console.log('SEND EVENT', event)
                 let msg = this.getSubscribeMessage(symbol)
                 let id = setInterval(() => {
+                    //console.log('READYSTATE', this.client.readyState), msg
                     if(this.client.readyState === 1){
                         this.client.send(msg);
                         clearInterval(id)
@@ -109,45 +170,78 @@ export default class BitmartWebSocket {
         
         });
         this.closeEvent = fromEvent(this.client, 'close').subscribe((event) => {
-            console.log('CLOSE EVENT', event)
+            //console.log('CLOSE EVENT', event)
             clearInterval(this.ping_id)
+            
+            
         });
 
-        }
+    }
 
         setOpenOrders (json, props){
-            //console.log('setOpenOrders', json, props, trades)
-           
-           // console.log('setOpenOrders unzipped', unzipped)
+            
             if(  json !== undefined && json.data !== undefined && json.data.length > 0 ){
                 
-                //console.log('pre pre pre Transform', json)
-                props.setData({
-                    ...props.data,
-                    asset:[]
-                })
-                // console.log('pre pre Transform', json.data, trades)
                 
                 let newTrade = this.transformer.getTradeStream(json.data[0],this.symbol)
                 let filtered;
                 if(newTrade.state === 'CANCELED'){
-                    //console.log('PRE FILTERED', this.trades);
+                    
                     this.trades = this.trades.filter(trade => trade.order_id !== newTrade.order_id)
-                    //console.log('FILTERED', this.trades);
+                 
 
                 } else {
                         
                         this.trades.unshift(newTrade)
                         
                 }
-                            
-                    //console.log('TRDATA4', this.trades);
+                   
+                this.callback(this.trades);
+                   
                     
-                props.setData({
-                    ...props.data,
-                    asset:this.trades
-                })
+                
+            }
+        }
+
+       
+
+        setSpotData (json){
+            
+            if(  json !== undefined && json.data !== undefined && json.data.length > 0 ){
+                
+                
+                let newState = this.transformer.getStream(json.data[0],this.symbol,this.prevPrices);
+                 
+                
+                this.callback(newState);
+                this.prevPrices.push(newState.lastPrice );
+
+                if(this.prevPrices.length > 2){
+                    this.prevPrices.splice(0,1);
+                }
         
+            }
+        } 
+        setDepthData (json){
+            
+           
+            //console.log('setDepthData unzipped', json)
+            if(  json !== undefined && json.data !== undefined && json.data.length > 0 ){
+                
+                
+                this.callback(json.data[0]);
+               
+        
+            }
+        }
+
+        setMarketData (json){
+            
+           
+            //console.log('setMarketData unzipped', json)
+            if(  json !== undefined && json.data !== undefined && json.data.length > 0 ){
+                       
+                this.callback(json.data[0]);
             }
         }
 
@@ -165,15 +259,57 @@ export default class BitmartWebSocket {
         }
 
         getSubscribeMessage (symbol) {
-            console.log('getSubscribeMessage', symbol )
+            let msg;
+            
             this.symbol = symbol;
-            return JSON.stringify({"op": "subscribe", "args":["spot/user/order:"+symbol]});
+            if(this.component === 'orders'){
+                msg = {"op": "subscribe", "args":["spot/user/order:"+symbol]}
+            } else if(this.component === 'ticker'){
+                msg = {"op": "subscribe", "args":["spot/ticker:"+symbol]}
+            } else if(this.component === 'depth'){
+                msg = {"op": "subscribe", "args": ["spot/depth5:"+symbol]}
+            } else if(this.component === 'market'){
+                msg = {"op": "subscribe", "args": ["spot/trade:"+symbol]}
+            } else {
+                msg = '';
+            }
+            //console.log('getSubscribeMessage', symbol, msg )
+            return JSON.stringify(msg);
         }
 
         getUnsubscribeMessage (symbol) {
-            console.log('getUnSubscribeMessage', symbol )
+            let msg;
+            if(this.component === 'orders'){
+                msg = {"op": "unsubscribe", "args":["spot/user/order:"+symbol]}
+            } else if(this.component === 'ticker'){
+                msg = {"op": "unsubscribe", "args":["spot/ticker:"+symbol]}
+            } else if(this.component === 'depth'){
+                msg = {"op": "unsubscribe", "args": ["spot/depth5:"+symbol]}
+            } else if(this.component === 'market'){
+                msg = {"op": "unsubscribe", "args": ["spot/trade:"+symbol]}
+            } 
+           // console.log('getUnSubscribeMessage', msg )
             
-            return JSON.stringify({"op": "unsubscribe", "args":["spot/user/order:"+symbol]});
+            return JSON.stringify(msg);
+        }
+
+        close(){
+            
+            let msg = this.getUnsubscribeMessage(this.symbol);
+            if(msg.length > 0){
+                let id = setInterval(() => {
+                   // console.log('READYSTATE', this.client.readyState)
+                    if(this.client.readyState === 3){
+                        clearInterval(id)
+                    } else if(this.client.readyState === 1){
+                        this.client.send(msg);
+                        this.client.close();
+                        clearInterval(id)
+                    } 
+                }, 1000);
+            }
+            
+            
         }
     
     
