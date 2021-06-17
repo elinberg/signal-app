@@ -12,7 +12,7 @@ import ExchangeTradeList from "./exchange.trade.component";
   //const { data , setData, dispatch} = React.useContext(AuthContext);
   //let exchange;
   //const {state} = useContext(TradeFormContext);
-  //console.log('CONTEXT',props)
+  console.log('CONTEXT',props)
  
   useEffect(() => {
    

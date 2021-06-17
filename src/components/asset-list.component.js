@@ -168,8 +168,10 @@ const AssetList = props => {
                 ...data,
                 asset:[]
             });
+            if(client[props.exchange.name] !== undefined){
+                client[props.exchange.name].close()
+            }
             
-            client[props.exchange.name].close()
     
             
             console.log('Leaving');
@@ -180,10 +182,6 @@ const AssetList = props => {
     
 
 
-console.log('AssetsList', props);
-if(props.data === undefined || props.data.asset === undefined || props.selectedTicker === undefined){
-    return ;
-}
     
     
     
@@ -241,7 +239,7 @@ const getOrderHistory = () => {
         });
     })
 
-    console.log('listOrderHistory', history)
+    // console.log('listOrderHistory', history)
 
 }
 

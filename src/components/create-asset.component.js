@@ -5,7 +5,7 @@ export default class CreateAsset extends Component {
 
     constructor(props) {
         super(props);
-
+        console.log(props)
         this.onChangePair = this.onChangePair.bind(this);
         this.onChangePrice = this.onChangePrice.bind(this);
         this.onChangeAmount = this.onChangeAmount.bind(this);
@@ -17,6 +17,17 @@ export default class CreateAsset extends Component {
             amount: '',
             //todo_completed: false
         }
+    }
+
+    componentDidMount() {
+        
+        axios.get('/api/asset/schema')
+
+            .then(res => {
+                console.log(res.data);
+                this.setState({schema:res.data})
+            
+            });
     }
 
     onChangePair(e) {
@@ -79,6 +90,25 @@ export default class CreateAsset extends Component {
         return (
             <div style={{ marginLeft: '12px', minWidth:'400px' }} className="float-left pt-2">
                 <h5>Create New Asset</h5>
+
+                {
+                <Table>
+                    <Row>
+                        <Col>Symbol</Col><Col>Open</Col><Col>Close</Col><Col>High</Col><Col>Low</Col>
+                    </Row>
+                {
+                    assets.forEach(asset => {
+                    <Row>
+                        <Col>{asset.symbol}</Col><Col>{asset.open}</Col><Col>{asset.close}</Col><Col>{asset.high}</Col><Col>{asset.low}</Col>
+                    </Row>
+                    })
+    
+
+                }
+                
+                </Table>
+                }
+
                 <form onSubmit={this.onSubmit}>
                     <div className="form-group"> 
                         <label>Pair: </label>

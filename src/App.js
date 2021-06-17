@@ -168,12 +168,13 @@ const reducer = (state, action) => {
     >
       
       <Router>
+        
         <div className="App">     
           <Alert />
           <Nav /> 
           <Sidebar />
           <br/>
-          
+          <div id="increment" /><div id="decrement" />
         </div>
       </Router>
       

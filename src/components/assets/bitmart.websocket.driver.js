@@ -10,7 +10,7 @@ export default class BitmartWebSocket {
         //console.log("BITMART PROPS", config, props, credentials, trades)
         let symbol = props.selectedTicker;
         this.client = new RobustWebSocket( config.url, null, {
-            timeout: 600000,
+            timeout: 60000,
             shouldReconnect: function(event, ws) {
                 console.log('Reconnecting')
                 if (event.code === 1008 || event.code === 1011) return

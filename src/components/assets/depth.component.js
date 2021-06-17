@@ -10,7 +10,7 @@ const [ data, setData ]= useState( {})
  
 const onPriceClick = e => {
     console.log('Price Click', e.target.innerText);
-    let event = {target:{value:e.target.innerText}}
+    let event = {target:{value:e.target.innerText.split(' ')[0]}}
     props.onChangePrice(event);
 }
 useEffect(() => {
@@ -102,12 +102,12 @@ useEffect(() => {
                 
                 <ul className="pt-1" style={{listStyleType:'none', paddingLeft:'0px'}}>
                 {data.asks.map((value, index) => {
-                            return <li className="tiny" key={index} style={{whiteSpace:'nowrap'}}><small onClick={onPriceClick} className="text-danger" >{value[0]}</small> <small className="" >{value[1]}</small></li>
+                            return <li className="tiny" onClick={onPriceClick} key={index} style={{whiteSpace:'nowrap'}}><small  className="text-danger" >{value[0]}</small> <small className="" >{value[1]}</small></li>
                 })}
                 </ul>
                 <ul style={{listStyleType:'none', paddingLeft:'0px'}}>
                 {data.bids.map((value, index) => {
-                            return <li className="tiny" key={index} style={{whiteSpace:'nowrap'}}><small onClick={onPriceClick} className="text-success">{value[0]}</small> <small className="" >{value[1]}</small></li>
+                            return <li className="tiny" onClick={onPriceClick} key={index} style={{whiteSpace:'nowrap'}}><small className="text-success">{value[0]}</small> <small className="" >{value[1]}</small></li>
                 })}
                 </ul>
                 

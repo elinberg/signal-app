@@ -89,7 +89,7 @@ class Transformer {
             return records;
           }
           if(this.name === 'Binance'){
- 
+            console.log('BINANCE XFORM', json)
             
             json.forEach( trade => {
               timestamp = Number.parseInt(trade.create_time) + 1000; //convert to milli's
@@ -328,16 +328,16 @@ class Transformer {
             date.toLocaleString("en-US", {day: "numeric"}) + ' ' +
             date.toLocaleTimeString('en-US')
             let cost =  parseFloat(trade.p) * parseFloat(trade.q)
-
+            let tick= ticker.filter(ticker => ticker.orig === trade.s.toUpperCase() );
             transformed = {
               order_id: trade.i,
               avg_price: trade.p ,//(trade.p !== undefined && trade.p.length > 0) ? trade.p : '', 
               price: trade.p, //(trade.p !== undefined && trade.p.length > 0) ? trade.p.match(/.*[1-9]/gm)[0] : '',
-              pair: ticker.replace('_', '/'),
+              pair: tick[0].value.replace('_', '/'),
               side: trade.S,
               qty: parseFloat(trade.q).toFixed(2),
               cost: cost.toFixed(2)  ,
-              base:ticker.split('_')[1],
+              base:tick[0].value.split('_')[1],
               order_type:  trade.o === 'market' || trade.o === 'MARKET'? 'Market': 'Limit' ,
               transaction_date: formatted,
               status: (trade.X !== undefined) ? trade.X : '',

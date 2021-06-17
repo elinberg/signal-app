@@ -19,6 +19,7 @@ export default class ExchangeForm extends Component {
         } else {
             this.thisExchange = [{ 
                 name: props.exchange.name,
+                id:props.exchange._id,
                 apiKey: '',
                 apiName: '',
                 secret: '',}];        
@@ -26,6 +27,7 @@ export default class ExchangeForm extends Component {
 
         this.state = {
             name: props.exchange.name,
+            id: props.exchange._id ,
             apiKey: this.thisExchange.length > 0 ? this.thisExchange[0].apiKey: '',
             apiName: this.thisExchange.length > 0 ? this.thisExchange[0].apiName: '',
             url: props.exchange.url,
@@ -69,13 +71,13 @@ export default class ExchangeForm extends Component {
     onSubmit(e) {
         e.preventDefault();
         
-        console.log(`Form submitted:`, this.state.name);;
+        console.log(`Form submitted:`, this.state.name, e);;
 
         const data = this.ex.filter(exchange => 
             this.state.name !== exchange.name
         )
 
-        data.push({ name: this.state.name, secret: this.state.secret, apiKey:this.state.apiKey, apiName:this.state.apiName})
+        data.push({ name: this.state.name, secret: this.state.secret, apiKey:this.state.apiKey, apiName:this.state.apiName, exchangeId:this.state.id})
         localStorage.setItem('exchanges', JSON.stringify(data));
         this.props.hideModal();
         //console.log(this.props)
@@ -94,6 +96,10 @@ export default class ExchangeForm extends Component {
                                 className="form-control"
                                 value={this.state.name}
                                 onChange={this.onChangeName}
+                                />
+                        <input  type="hidden"
+                                className="form-control"
+                                value={this.state.is}
                                 />
                     </div>
                     <div className="form-group">

@@ -2,11 +2,40 @@
   text-align: center;
 }
 
+#chart {
+  padding-top: 5px !important;
+}
+
 input {
   min-width:149px;
 }
 .mt-9x {
   margin-top: 9px;
+}
+.react-select-container{
+  z-index: 1001;
+}
+.floating-tooltip-2 {
+	width: 96px;
+	height: 80px;
+	position: absolute;
+	display: none;
+	padding: 8px;
+	box-sizing: border-box;
+	font-size: 12px;
+	color: #252323;
+	background-color: rgb(255, 255, 255);
+	text-align: left;
+	z-index: 20;
+	top: 12px;
+	left: 12px;
+	pointer-events: none;
+	border: 1px solid rgb(0, 0, 0);
+	border-radius: 2px;
+}
+
+#market-limit-tabpane-limit, #market-limit-tabpane-market {
+  height: 190px !important;
 }
 .carousel-indicators-numbers li {
   text-indent: 0;
@@ -139,7 +168,7 @@ label {
 
 .sidebar {
   text-align: left;
-  z-index: 100;
+  z-index: 1000;
   padding: 48px 30px 0;
   max-width: 220px;
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);

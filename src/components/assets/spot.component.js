@@ -120,11 +120,13 @@ useEffect(() => {
         
        
         client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name],  props,{key:'',apiName:'',secret:''}, prevPrices, msg , (spot) => {
-           
+            props.PriceCallback(spot.lastPrice)
             setData({
                 ...data,
                 spot:spot
             });
+
+            
             //console.log('CALLBACK DATA', spot);
         });
  
@@ -150,15 +152,17 @@ useEffect(() => {
         }; 
 
 },[props.selectedTicker]);
-if(data.spot === undefined){
+if(data === undefined || data.spot  === undefined|| data.spot.priceStyle  === undefined  ){
     return null;
 }
+
+
 //console.log(count++) 
         return (
             
             <div className="container" style={{marginTop: '2px', marginBottom: '2px'}}>
                 
-                 <div onClick={onPriceClick} style={{width:'72%', paddingLeft:'1px',paddingTop:'1px'}} className="float-left"><h6 className={data.spot.priceStyle}>{data.spot.lastPrice}</h6></div>
+                 <div onClick={onPriceClick} style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', height:'23px'}} className="float-left"><h6 className={data.spot.priceStyle}>{data.spot.lastPrice}</h6></div>
                 <div style={{width:'28%', paddingLeft:'1px'}} className="float-left"><h6> {data.spot.baseAsset}</h6></div>
 
                 <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', marginTop:'0px' }} className="tiny pt-1 float-left"><small>{data.spot.high24hr}</small></div>

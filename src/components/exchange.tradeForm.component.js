@@ -14,8 +14,10 @@ import { useHistory } from "react-router";
  const  ExchangeTradeForm = (props) => {
 // onTabSelect={onSelect} prev={prev} setTab={setKey} tab={key} exchange={props.exchange}
     
-
+    
     const [orderType, setOrderType] = useState('limit');
+    const [mounted, setMounted] = useState(false);
+    const [current_price, setCurrent] = useState(0);
     
     const onSelect = k => {
         console.log('onSelect',k)
@@ -92,20 +94,21 @@ useEffect(() => {
 }, [orderType]);
 
 useEffect(() => {
-
-
+    ;
+     setMounted(true)
       axios.get(props.exchange.url+'/tickers').then(result => {
             
         result.data.tickers.forEach((ticker,i) => {
 
-            result.data.tickers[i] = { value: ticker, label: ticker }
+            result.data.tickers[i] = { value: ticker, label: ticker , orig:ticker.replace('_','')}
         })
 
         console.log('TICKERS:',props.exchange.url,result.data.tickers);
-            
+            let tickers = [];
+            tickers[props.exchange.name]=result.data.tickers;
             setData({
             ...data,
-            tickers:result.data.tickers
+            tickers:tickers
             })
 
         });
@@ -127,7 +130,7 @@ useEffect(() => {
                 //console.log('ACCOUNTDATA:',data);
     
             })
-        //}
+            
       return () => {
           //setData({})
           console.log('LEAVING')
@@ -268,7 +271,7 @@ return (
                 
                 <form className="form-row pb-0 mb-0" style={{width:'100%'}} onSubmit={onSubmit}>
                     <div className="form-group col-sm-6 mb-0"> 
-                    <TickerSelect options={data.tickers} onFocus={onFocusTicker} onChange={onChangeTicker} />
+                    <TickerSelect options={data.tickers[props.exchange.name]} onFocus={onFocusTicker} onChange={onChangeTicker} />
                         <input  type="hidden"
                                 className="form-control"
                                 value={data.name}
@@ -280,17 +283,17 @@ return (
                     </div>
                     <div className="form-group col-sm-6 mb-0"> 
                     
-                    <Spot onChangePrice={onChangePrice}  exchange={props.exchange} selectedTicker={data.selectedTicker}  />
+                    <Spot PriceCallback={setCurrent} isMounted={mounted} onChangePrice={onChangePrice}  exchange={props.exchange} selectedTicker={data.selectedTicker}  />
                     
                     </div>
 
-                    <Tabs onSelect={onSelect} defaultActiveKey="limit" id="controlled-tab-example" className="col-sm-12">
+                    <Tabs onSelect={onSelect} defaultActiveKey="limit" id="market-limit" className="col-sm-12">
                 <Tab eventKey="limit" title="Limit" className="col-sm-12">
                 
                    <div className="row pt-2"> 
                    <div className="col-sm-6"> 
                     <div className="form-group"> 
-                        <label>Price</label>
+                    
                         <input  type="text"
                                 placeholder="Price"
                                 className="form-control"
@@ -298,8 +301,7 @@ return (
                                 onChange={onChangePrice}
                                 />
                     </div>
-                    <div className="form-group"> 
-                        <label>Qty</label>
+                    <div className=""> 
                         <input  type="text"
                                 placeholder="Quantity"
                                 className="form-control"
@@ -307,13 +309,13 @@ return (
                                 onChange={onChangeQty}
                                 />
                     </div>
-                    <Wallet tab={props.tab} clearAmount={clearAmount} wallet={wallet.wallet} ticker={data.selectedTicker} setAmount={onChangeAmount}/>
+                    <Wallet tab={props.tab} currentPrice={current_price} clearAmount={clearAmount} wallet={wallet.wallet} ticker={data.selectedTicker} setAmount={onChangeAmount}/>
                     <div className="form-group mb-0 pb-0"> 
                         <label>Total:</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
                 </div>
                 <div className="col-sm-6 form-group">
-                <label>Depth</label>
+                
                     <Depth onChangePrice={onChangePrice} clearTicker={clearTicker}  baseAsset={data.baseAsset}  exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
                 </div>
                     
@@ -323,7 +325,6 @@ return (
                 <div className="row pt-2">
                 <div className="col-sm-6"> 
                 <div className="form-group "> 
-                        <label>Price</label>
                         <input  type="text"
                                 disabled="disabled"
                                 placeholder="Optimal Market Price"
@@ -332,8 +333,7 @@ return (
                                 
                                 />
                 </div>
-                <div className="form-group"> 
-                        <label>Total</label>
+                <div className=""> 
                         <input  type="text"
                                 placeholder={ props.tab === 'buy' ? 'Total '+data.baseAsset : 'Total '+data.sellAsset}
                                 className="form-control"
@@ -341,13 +341,13 @@ return (
                                 onChange={onChangeQty}
                                 />
                 </div>
-                <div><Wallet clearAmount={clearAmount} tab={props.tab} wallet={wallet.wallet} ticker={data.selectedTicker}  setAmount={onChangeAmount}/></div>
+                <div><Wallet clearAmount={clearAmount}  tab={props.tab} wallet={wallet.wallet} ticker={data.selectedTicker}  setAmount={onChangeAmount}/></div>
                     <div className="form-group mb-0"> 
-                        <label>Total:</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
+                        <label>Total:{data.selectedTicker}</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
                 </div>
                 <div className="col-sm-6 form-group">
-                    <label>Depth</label>
+                    
                     <Depth onChangePrice={onChangePrice} clearTicker={clearTicker}  baseAsset={data.baseAsset}  exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
                 </div>
                 </div>
@@ -360,7 +360,7 @@ return (
                         <input type="submit" value="Place sell order" className="btn btn-danger" />
                     }
                     </div>
-                    <AssetList onChangePrice={onChangePrice} data={data} clearTicker={clearTicker} setData={setData} selectedTicker={data.selectedTicker} exchange={props.exchange} prevSelectedTicker={data.prevSelectedTicker}/>
+                    <AssetList onChangePrice={onChangePrice} tickers={data.tickers} data={data} clearTicker={clearTicker} setData={setData} selectedTicker={data.selectedTicker} exchange={props.exchange} prevSelectedTicker={data.prevSelectedTicker}/>
                 </form>
             {/* <div className="d-flex justify-content-between flex-wrap  align-items-center pb-2 mb-3 border-bottom"> */}
                 {/* <Trade exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  /> */}

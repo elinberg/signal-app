@@ -67,7 +67,8 @@ const ExchangeTradeList = props => {
 
     const initialState = {
         exchange: [],
-        showModal: 'none'
+        showModal: 'none',
+        schema:[],
       };
 
     const [data, setData] = React.useState(initialState);
@@ -86,6 +87,7 @@ console.log('ExchangeTradeList', data)
                  console.log('GET EX',response.data, data)
                 setData({
                     ...data,
+                    schema:[],
                     exchange: response.data,
                     showModal: 'none'
                   });
