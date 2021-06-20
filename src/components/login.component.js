@@ -82,7 +82,7 @@ const Login = () => {
         
         axios.post('/api/auth/signin', newLogin)
             .then(res => {
-                console.log(res.data);
+                //console.log(res.data);
                 
                 localStorage.setItem('token', res.data.token);
                 

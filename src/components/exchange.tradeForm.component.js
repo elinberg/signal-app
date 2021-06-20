@@ -3,7 +3,7 @@ import axios from 'axios';
 import TickerSelect from "./assets/ticker.select.component";
 import Spot from "./assets/spot.component";
 import Depth from "./assets/depth.component";
-import Technicals from "./assets/technicals.component";
+//import Technicals from "./assets/technicals.component";
 import Wallet from "./assets/wallet.component";
 import AssetList from "./asset-list.component";
 import { Tabs, Tab } from "react-bootstrap";
@@ -65,7 +65,7 @@ import { useHistory } from "react-router";
 
         
 const [data, setData]= useState(initalState);          
-const [wallet, setWallet]= useState({wallet:[]});
+const [wallet, setWallet]= useState([]);
 useEffect(() => {
 
     
@@ -124,9 +124,9 @@ useEffect(() => {
             
             console.log('WALLET',result.data.wallet)
     
-                setWallet({
-                wallet:result.data.wallet
-                })
+                setWallet(
+                    result.data.wallet
+                )
                 //console.log('ACCOUNTDATA:',data);
     
             })
@@ -309,7 +309,7 @@ return (
                                 onChange={onChangeQty}
                                 />
                     </div>
-                    <Wallet tab={props.tab} currentPrice={current_price} clearAmount={clearAmount} wallet={wallet.wallet} ticker={data.selectedTicker} setAmount={onChangeAmount}/>
+                    <Wallet tab={props.tab} currentPrice={current_price} clearAmount={clearAmount} wallet={wallet} ticker={data.selectedTicker} setAmount={onChangeAmount}/>
                     <div className="form-group mb-0 pb-0"> 
                         <label>Total:</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
@@ -341,7 +341,7 @@ return (
                                 onChange={onChangeQty}
                                 />
                 </div>
-                <div><Wallet clearAmount={clearAmount}  tab={props.tab} wallet={wallet.wallet} ticker={data.selectedTicker}  setAmount={onChangeAmount}/></div>
+                <div><Wallet clearAmount={clearAmount}  tab={props.tab} wallet={wallet} ticker={data.selectedTicker}  setAmount={onChangeAmount}/></div>
                     <div className="form-group mb-0"> 
                         <label>Total:{data.selectedTicker}</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
@@ -360,7 +360,14 @@ return (
                         <input type="submit" value="Place sell order" className="btn btn-danger" />
                     }
                     </div>
-                    <AssetList onChangePrice={onChangePrice} tickers={data.tickers} data={data} clearTicker={clearTicker} setData={setData} selectedTicker={data.selectedTicker} exchange={props.exchange} prevSelectedTicker={data.prevSelectedTicker}/>
+                    <AssetList onChangePrice={onChangePrice}
+                      tickers={data.tickers}
+                      data={data} clearTicker={clearTicker}
+                      setData={setData} 
+                      selectedTicker={data.selectedTicker} 
+                      exchange={props.exchange} 
+                      prevSelectedTicker={data.prevSelectedTicker}
+                    />
                 </form>
             {/* <div className="d-flex justify-content-between flex-wrap  align-items-center pb-2 mb-3 border-bottom"> */}
                 {/* <Trade exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  /> */}

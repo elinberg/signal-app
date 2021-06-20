@@ -49,9 +49,9 @@ const EditAsset = props => {
   const exchangeName = 'Binance';
   //const { dispatch } = React.useContext(AuthContext);
   let history = useHistory();
-  const [state, setState] = useState({ tickers: [], tick: '', tickerData: [], interval: interval, candles: {}, lwc: {}, container: {} });
+  const [state, setState] = useState({ tickers: [], tick: '', tickerData: [], interval: interval, candles: {}, lwc: {}, series:[] ,container: {} });
+
   
-  var [chartCount, setChartCount] = useState(0);
   let chart, candles
   //let charts = [];
 
@@ -107,6 +107,9 @@ const EditAsset = props => {
 }
 
 export default EditAsset
+
+
+
 let worker;
 let series = [];
 const Tickers = (props) => {
@@ -114,58 +117,43 @@ const Tickers = (props) => {
   var [interval, setInterval] = useState('1m');
   const { dispatch } = React.useContext(ChartContext);
   var msg;
-  const [symbol, setSymbol] = useState('')
-  //console.log('ChartContext', props)
+  const [symbol, setSymbol] = useState({symbol:"",symbolOrig:"",symbolOrigLower:""})
+  // psuedo constructor
   useEffect(() => {
     getTickerData(props.exchangeName)
-   
-  }, [])
- 
-  
-  /// props.setState({...props.state,onChange:props.onChange,onFocus:props.onFocus})
-  useEffect( () => {
-   
-   
-   return() => {
-    
 
-   }
-  },[])
+  }, [])
+
+
+  /// props.setState({...props.state,onChange:props.onChange,onFocus:props.onFocus})
+  useEffect(() => {
+
+
+    return () => {
+
+
+    }
+  }, [])
 
   //console('WORKER STATUS',status);
 
   useEffect(() => {
-  
 
-
-
-
-    // if( state === undefined ||props === undefined || 
-    //   props.state === undefined || props.state.tick === undefined || 
-    //   state.candle === undefined){
-    //   return
-    // }
-    if(worker === undefined || state.series === undefined){
+    if (worker === undefined || state.series === undefined) {
       return;
     }
     //setState({...state,tick:props.state.tick,symbol:props.state.symbol})
     console.log('STARTING LISTEN WORKER', state) //,props.tick, props.symbol
-     //setState({...state,tick:props.tick,symbol:props.symbol})
-     startWorker(props)
+    //setState({...state,tick:props.tick,symbol:props.symbol})
+    startWorker(props)
     // msg = JSON.stringify({ cmd: 'open', data: { symbol: 'btcusd', interval: interval } })
     // worker.postMessage(msg)
-
-
-
-
-
-
 
     // msg = props.state.tick+'@kline_'+interval
     // msg = JSON.stringify({ cmd: 'subscribe', data: [msg]  })
 
     // worker.postMessage(msg)
-    let endpoint = props.state.tick+'@kline_'+interval
+    let endpoint = props.state.tick + '@kline_' + interval
     msg = JSON.stringify({ cmd: 'unsubscribe', data: endpoint })
 
     //worker.postMessage(msg)
@@ -173,82 +161,86 @@ const Tickers = (props) => {
     //msg = JSON.stringify({ cmd: 'open', data: { symbol: props.state.tick, interval: interval } })
     //worker.postMessage(msg)
 
-    msg = props.state.tick+'@kline_'+interval
+    msg = props.state.tick + '@kline_' + interval
     //msg = JSON.stringify({ cmd: 'subscribe', data: [msg]  })
 
     //worker.postMessage(msg)
 
 
-     return() => {
+    return () => {
       // let endpoint = props.state.tick+'@kline_'+interval
       // msg = JSON.stringify({ cmd: 'unsubscribe', data: endpoint })
-      
+      //state.worker.postMessage(JSON.stringify({ cmd: 'close', data: "" }))
       // worker.postMessage(msg)
       // console.log('WORKER EXITING', msg)
-       
+
       //worker.terminate()
-     }
- 
-  },[state.tick, state.candle]) //props.state.tick, state.candle
+    }
+
+  }, [symbol, state.candle]) //props.state.tick, state.candle
 
 
 
-  
+
 
   const startWorker = () => {
 
     // window.addEventListener('work',(e) => {
     //if(chartCount === 0){
     // setState({...state,tick:e.detail.tick})
-    console.log('LISTEN WORKER', state , props)
+    console.log('LISTEN WORKER', state, props, symbol)
     //worker = Worker();
-   // setState({...state, worker:worker})
+    // setState({...state, worker:worker})
 
     state.worker.addEventListener('message', event => {
-      console.log('STUCK', event)
-      if ( (event === undefined || event.data === undefined ||
-         event.data.k === undefined  || state === undefined  ||
-         state.series === undefined || state.candle === undefined ||
-        symbol === undefined ) ){
+      console.log('STUCK', event, state, symbol)
+      if ((event === undefined || event.data === undefined ||
+        event.data.k === undefined || state === undefined ||
+        state.series === undefined || state.candle === undefined || symbol === undefined ||
+        symbol.symbolOrig === undefined)) {
         //console.log('WORKER READY')
-        console.log('STUCK',state.series, state.series.length, state.series[state.series.length-1])
+        console.log('STUCK 2', state.series, state.series.length, state.series[state.series.length - 1])
         return
-      } else if(  event.hasOwnProperty('data') && event.data.hasOwnProperty('result') ){
+      } else if (event.hasOwnProperty('data') && event.data.hasOwnProperty('result')) {
+        console.log('GOT ID FROM REPLY',  event.data.id)
+        //return
       } else {
-        
+
       }
-        
-      
-      
+
+
+
       let t = {};
       let time;
       let len = state.series.length;
       let open, close, high, low;
-console.log('STUCK',state.series, state.series.length, state.series[state.series.length-1])
+      console.log('STUCK AGAIN', state.series, state.series.length, state.series[state.series.length - 1])
       time = Number(parseFloat(Number(event.data.k.T) / 1000).toFixed(0))
+      
+      // here we are consolidating frames with same timestamp
       if (state.series[len - 1].time !== time) {
-        
         open = event.data.k.o;
         close = open
         low = open
         high = open
-
       } else {
-
         open = event.data.k.o;
         close = event.data.k.c
         low = event.data.k.l
         high = event.data.k.h
       }
       let data
-      console.log('WORKER MATCH?', event.data.k.s.toLowerCase(), symbol) //todo
-      if (state.series[len - 1].time > time || (event.data.k.s.toLowerCase() !== symbol.toLowerCase())) {
+      console.log('WORKER MATCH?', event.data.k.s.toLowerCase(), symbol.symbolOrigLower) //todo
+      if (state.series[len - 1].time > time || (event.data.k.s.toLowerCase() !== symbol.symbolOrigLower)) {
         console.log('We got negtive time or stagnant data')
-        state.series=[];
+        state.series = [];
         data = { time: time, open: open, high: high, low: low, close: close }
-        //console.log('SERIES PUSH', data)
+        console.log('SERIES PUSH', data)
+        // i don't think we push bad data and del seems excessive
         state.series.push(data);
-        
+
+
+
       } else {
         data = { time: time, open: open, high: high, low: low, close: close }
         //console.log('SERIES PUSH', data)
@@ -257,72 +249,56 @@ console.log('STUCK',state.series, state.series.length, state.series[state.series
         state.candle.update(data)
         //candleCallback(data)
       }
- 
-        setState(state.series.splice( 2002, state.series.length));
+      //console.log('SPLICE',state.series.splice(-2020));
+
+      // setState(state.series.splice( 2002, state.series.length));
     });
 
-    
+
   }
 
 
   const onChangeTicker = (e) => {
-    console.log('useCallback onChangeTicker', e.orig.toLowerCase(), props.state.tick,worker )
-    setSymbol(e.orig)
+    //console.log('useCallback onChangeTicker', e.orig.toLowerCase(), props.state.tick, worker)
+    //symbol:"",symbolOrig:"",symbolOrigLower
+    console.log("CHANGE TICKER", e)
+    setSymbol({symbol:e.value,symbolOrig:e.orig,symbolOrigLower:e.orig.toLowerCase()})
     let endpoint;
-    if(e.orig.length > 0 && e.orig.toLowerCase() !== props.state.tick && worker !== undefined){
-      
-      
-      
-      if(props.state.tick.length < 2){
-        endpoint = 'btcusd@kline_'+interval
+    if (e.orig.length > 0 && e.orig.toLowerCase() !== props.state.tick && worker !== undefined) {
+
+      if (props.state.tick.length < 2) {
+        endpoint = 'btcusd@kline_' + interval
         msg = JSON.stringify({ cmd: 'unsubscribe', data: endpoint })
-        console.log('WORKER SENT 1',msg)
+        console.log('WORKER SENT 1', msg)
         state.worker.postMessage(msg)
       } else {
-        endpoint = props.state.tick+'@kline_'+interval
+        endpoint = props.state.tick + '@kline_' + interval
         msg = JSON.stringify({ cmd: 'unsubscribe', data: endpoint })
-        console.log('WORKER SENT 2',msg)
+        console.log('WORKER SENT 2', msg)
         state.worker.postMessage(msg)
       }
-        
+
+      endpoint = e.orig.toLowerCase() + '@kline_' + interval
+      msg = JSON.stringify({ cmd: 'subscribe', data: endpoint })
+      console.log('WORKER SENT 3', msg, worker)
+      state.worker.postMessage(msg)
+
+    } 
+
     
-     
-     endpoint = e.orig.toLowerCase()+'@kline_'+interval
-      msg = JSON.stringify({ cmd: 'subscribe', data: endpoint })
-      console.log('WORKER SENT 3',msg)
-      state.worker.postMessage(msg)
 
-    } else if(e.orig.length > 0 && e.orig.toLowerCase() === props.state.tick &&  worker !== undefined){
-      endpoint = e.orig.toLowerCase()+'@kline_'+interval
-      msg = JSON.stringify({ cmd: 'subscribe', data: endpoint })
-      console.log('WORKER SENT 4',msg)
-      state.worker.postMessage(msg)
-    } else if(worker !== undefined && e.orig !== undefined)  {
-      endpoint = e.orig.toLowerCase()+'@kline_'+interval
-      msg = JSON.stringify({ cmd: 'subscribe', data: endpoint })
-      console.log('WORKER SENT 5', e.value )
-      //console.log('WORKER SENT',msg)
-    } else {
-      console.log('WORKER SENT 6', e.value, e.orig.toLowerCase() )
-      endpoint = e.orig.toLowerCase()+'@kline_'+interval
-      msg = JSON.stringify({ cmd: 'subscribe', data: endpoint })
-  
-    }
-      
-    //console.log('WORKER SENT',msg)
-
-    setState({
-      ...state,
-      tick: e.orig.toLowerCase(),
-      symbol: e.value
-    })
+    // setState({
+    //   ...state,
+    //   tick: e.orig.toLowerCase(),
+    //   symbol: e.value
+    // })
 
     props.setState({
       ...props.state,
       tick: e.orig.toLowerCase(),
       symbol: e.value
     })
-    
+
 
 
     console.log('GETTING OHLC', 'https://min-api.cryptocompare.com/data/v2/histominute?fsym=' + e.value.toLowerCase().split('_')[0] + '&tsym=' + e.value.toLowerCase().split('_')[1] + '&limit=2000');
@@ -337,15 +313,15 @@ console.log('STUCK',state.series, state.series.length, state.series[state.series
         //let msg = JSON.stringify({ cmd: 'open', data: { symbol: e.orig.toLowerCase(), interval: interval } })
 
 
-        //msg = JSON.stringify({ cmd: 'open', data: { symbol: e.orig.toLowerCase(), interval: interval } })
-        res.data.Data.Data[0].symbol=e.orig;
-        series=res.data.Data.Data
-        console.log('SERIES INIT', series)
-        setState({ ...state, chartData: res.data.Data.Data, series:series });
-
-
        
-        
+        res.data.Data.Data[0].symbol = e.orig;
+        series = res.data.Data.Data
+        console.log('SERIES INIT', series)
+        setState({ ...state, chartData: res.data.Data.Data, series: series });
+
+
+
+
         //endpoint = symbol+'@kline_'+interval
         //work = new CustomEvent('work', { detail: {msg:msg,data:res.data.Data.Data,series:series, symbol:e.orig.toLowerCase(), tick:state.tick}  });
         //window.dispatchEvent(work )
@@ -354,12 +330,12 @@ console.log('STUCK',state.series, state.series.length, state.series[state.series
       }).catch(e => {
         console.log(e)
       })
-      // props.setState({
-      //   ...props.state,
-      //   tick: e.orig.toLowerCase(),
-      //   symbol: e.value
-      // })
-    
+    // props.setState({
+    //   ...props.state,
+    //   tick: e.orig.toLowerCase(),
+    //   symbol: e.value
+    // })
+
   }
 
   const getTickerData = (exchangeName) => {
@@ -380,23 +356,23 @@ console.log('STUCK',state.series, state.series.length, state.series[state.series
 
     let get = async () => {
       const response = await fetch('/api/exchange/' + currentExchange[0].exchangeId)
-      const data = await response.json()
-      data.tickers.forEach((ticker, i) => {
-        data.tickers[i] = { value: ticker, label: ticker, orig: ticker.replace('_', '') }
+      const exchange = await response.json()
+      console.log('TICKS',Array(exchange.tickers))
+      exchange.tickers.forEach((ticker, i) => {
+        exchange.tickers[i] = { value: ticker, label: ticker, orig: ticker.replace('_', '') }
       })
 
-      props.setState({ ...props.state, tickers: data.tickers });
+      props.setState({ ...props.state, tickers: exchange.tickers });
 
 
     }
     get();
-    console.log('STARTING WORKER',state, props.state, props)
-    
-    
-    
-    
+
+
+    console.log('STARTING WORKER', state, props.state, props)
+
     worker = Worker();
-    setState({...state, worker: worker})
+    setState({ ...state, worker: worker })
     msg = JSON.stringify({ cmd: 'open', data: { symbol: 'btcusd', interval: interval } })
     worker.postMessage(msg)
     // worker.addEventListener('message', event => {
@@ -405,7 +381,7 @@ console.log('STUCK',state.series, state.series.length, state.series[state.series
 
 
     if (currentExchange[0] === undefined) {
-      history.push('/exchanges')
+      //history.push('/exchanges')
       // dispatch({
       // type: SET_ALERT,
       // payload: {  message:'Configure your Exchanges by adding API Keys', alertType: 'success', timeout:3000}
@@ -431,12 +407,14 @@ console.log('STUCK',state.series, state.series.length, state.series[state.series
 
 }
 
+///end tickers
+
 const Chart = (props) => {
-  var [prev,setPrev] = React.useState('')
-  var [oldChart,setOldChart] = React.useState({})
-  var [oldCandle,setOldCCandle] = React.useState({})
-  var [flag,setFlag] = React.useState(false)
-  var [oldToolTip,setToolTip] = React.useState(false)
+  var [prev, setPrev] = React.useState('')
+  var [oldChart, setOldChart] = React.useState({})
+  var [oldCandle, setOldCCandle] = React.useState({})
+  var [flag, setFlag] = React.useState(false)
+  var [oldToolTip, setToolTip] = React.useState(false)
   React.useEffect(() => {
     let data = props.data;
     let container;
@@ -450,11 +428,11 @@ const Chart = (props) => {
       return null;
     }
 
-let callback = props.candleCallback
+    let callback = props.candleCallback
 
-// callback = props => {
-//   console.log('CALLBACK')
-// }
+    // callback = props => {
+    //   console.log('CALLBACK')
+    // }
 
     container = document.getElementById('chart')
 
@@ -469,7 +447,7 @@ let callback = props.candleCallback
       wickUpColor: '#28a745',
       wickDownColor: '##dc3545',
     }
-    if(data[0].symbol.toLowerCase() !== prev && prev.length > 0 ){
+    if (data[0].symbol.toLowerCase() !== prev && prev.length > 0) {
       //console.log('CHART CHANGED',oldCandle)
       chart = oldChart;
       chart.removeSeries(oldCandle)
@@ -489,19 +467,19 @@ let callback = props.candleCallback
     candles.setData(data);
 
     console.log('CANDLES', data)
-    props.setState({...props.state,candle:candles})
+    props.setState({ ...props.state, candle: candles })
     //
 
-   ////// update candles
+    ////// update candles
 
     var toolTipWidth = 80;
     var toolTipHeight = 80;
     var toolTipMargin = 15;
 
     var toolTip;
-    
+
     container = document.getElementById('container')
-    if(flag){
+    if (flag) {
       // chart changed
       toolTip = document.getElementById('toolTip')
       container.removeChild(toolTip)
@@ -510,7 +488,7 @@ let callback = props.candleCallback
       toolTip.id = 'toolTip';
       container.appendChild(toolTip);
       //console.log('TOOLTIP CHANGED', container, toolTip, oldToolTip, document.getElementsByClassName('floating-tooltip-2'))
-      
+
     } else {
       setFlag(true)
       //old Tooltip
@@ -521,7 +499,7 @@ let callback = props.candleCallback
       console.log('TOOLTIP ORIG', container, toolTip)
       setToolTip(toolTip)
     }
-    
+
 
     chart.subscribeCrosshairMove(function (param) {
       let width = 600;
@@ -567,7 +545,7 @@ let callback = props.candleCallback
     });
     chart.timeScale().fitContent();
 
-    
+
     //console.log('SERIES OPTIONS', data, opt)
 
   }, [props.data])

@@ -181,7 +181,7 @@ export default class BitmartWebSocket {
         setOpenOrders (json, props){
             
             if(  json !== undefined && json.data !== undefined && json.data.length > 0 ){
-                
+                console.log('setOpenOrders',json,this.symbol, this.trades)
                 
                 let newTrade = this.transformer.getTradeStream(json.data[0],this.symbol)
                 let filtered;

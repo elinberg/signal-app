@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from "react-router";
+import { throwError } from 'rxjs';
 import SocketFactory from './socket.factory';
 
 // let count = 0;
 // let prices = [];
 // let gains = [];
 // let losses = [];
+let endpoint;
 const Spot = props => {
 //const { state, dispatch } = React.useContext(AuthContext); 
 const history = useHistory();
@@ -104,23 +106,31 @@ useEffect(() => {
        
 
         
-        if(props.selectedTicker.length < 3){
-            return;
-        }
+        // if(props.selectedTicker.length < 3 && props.selectedTicker !== undefined){
+        //     //return;
+        // }
 
-        let msg = '';
-
-        if(props.exchange.name === 'Binance'){
-            msg=props.selectedTicker.replace(/_/g,"").toLowerCase()+'@miniTicker';
+        
+console.log('PROPS', props)
+        if(props.exchange.name === 'Binance' && props.selectedTicker !== undefined && props.selectedTicker.length > 0){
+            endpoint=props.selectedTicker.replace(/_/g,"").toLowerCase()+'@miniTicker';
+        } else {
+            endpoint  =props.selectedTicker
+            if(endpoint.length < 1)return
+            console.log('GOT HERE', endpoint)
         }
         let client = [];
        // client[props.exchange.name] = new WebSocketConnection(props,setData, data ,msg );
        let prevPrices=[];
-        const config = { Bitmart: {name:'BitmartWebSocket', component:'ticker', login:false, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', component:'ticker', login:false, url:'wss://stream.binance.us:9443/ws/'} };
+        const config = { Bitmart: {name:'BitmartWebSocket', component:'ticker', login:false, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, 
+        Binance: {name:'BinanceWebSocket', component:'ticker', login:false, url:'wss://stream.binance.us:9443/ws/'+endpoint} };
         
        
-        client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name],  props,{key:'',apiName:'',secret:''}, prevPrices, msg , (spot) => {
+        client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name],  props,{key:'',apiName:'',secret:''}, prevPrices, endpoint , (spot) => {
+            
             props.PriceCallback(spot.lastPrice)
+            
+            
             setData({
                 ...data,
                 spot:spot

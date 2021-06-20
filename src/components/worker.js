@@ -24,7 +24,8 @@ import SocketFactory from './assets/socket.factory';
 let client = []
 let unSubInt = 1000
 let initialValue = 1000;
-let id
+let id, iid
+let lastSubscribe = '';
 let msg;
 let subscriptionId = 1000;
 let subscriptions = new Map();
@@ -33,7 +34,12 @@ let subscriptions = new Map();
 let i	= 0
 onmessage = function (event) {
 	//var workerResult = event.data;
+
+	// (url) => {
+	// 	console.log('WORKER SET URL', url);
+	// return 'wss://stream.binance.us:9443/ws/'
 	
+	//  }
 	
 
 	console.log('WORKER GOT',  JSON.parse(event.data), i)
@@ -51,22 +57,26 @@ onmessage = function (event) {
 			let symbol = req.data.symbol;
 				msg='';
 				//msg='dogeusdt@kline_1m';
-				console.log('WORKER SENT OPEN ('+ subscriptionId +')', endpoint)
+				console.log('WORKER SENT OPEN ('+ subscriptionId +')', endpoint, {"props":{"selectedTicker":symbol}})
+				//let props={props:{"selectedTicker":symbol}}
 				
-			var config = { Bitmart: {name:'BitmartWebSocket', component:'kline', login:false, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', component:'kline', login:false, url:'wss://stream.binance.us:9443/ws/'} };
-			client['Binance'] =  SocketFactory.createInstance(config['Binance'], {"props":{"selectedTicker":symbol} }, { key:'',apiName:'',secret:''}, [], endpoint , (market) => {
+			var config = { Bitmart: {name:'BitmartWebSocket', component:'kline', login:false, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', component:'kline', login:false, url:'wss://stream.binance.com:9443/ws/'}}
+			client['Binance'] =  SocketFactory.createInstance(config['Binance'], {props:{"selectedTicker":symbol}}, { key:'',apiName:'',secret:''}, [], endpoint , (market) => {
 				//console.log("MARKET", market)
 				
 				postMessage(market);
 			
+			}, ()=>{ if(client.name === 'Binance'  ){
+				return 'wss://stream.binance.com:9443/ws/'
+					} 
 			});
 
 			var readyState
-			let iid = setInterval(() =>{
+			 iid = setInterval(() =>{
 				readyState=client['Binance'].client.readyState
 				console.log('READYSTATE ', readyState, new Date())
 				//postMessage(JSON.stringify({}))
-			},30000, client['Binance'],);
+			},600000, client['Binance'],);
 
 	} else if(req.cmd === 'close'){
 		clearInterval(iid)
@@ -125,7 +135,7 @@ onmessage = function (event) {
 				
 				//client['Binance'].setEndPpoint(req.data)
 	
-			
+				lastSubscribe = req.data;
 				 //msg = JSON.stringify(`{"method":"SUBSCRIBE","params":[${req.data}],"id":${id}}`);
 				msg = "{\"method\":\"SUBSCRIBE\",\"params\":[\"" + req.data + "\"],\"id\":" + id + "}"
 			  try {
