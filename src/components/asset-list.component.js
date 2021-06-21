@@ -71,7 +71,9 @@ const OpenOrders  = props => {
             orders = transformer.getTrades(response.data.trades,props.selectedTicker)
             console.log('WARNING LISTENKEY', props.selectedTicker,response.data.listenKey);
 
-            if(props.exchange.name === 'Binance' && response.data.listenKey !== undefined && props.selectedTicker !== undefined){
+            if(props.exchange.name === 'Binance' &&
+            response.data.listenKey !== undefined &&
+            props.selectedTicker !== undefined){
                 console.log('LISTENKEY 69', props.data.name,props.selectedTicker,response.data.listenKey);
                 endpoint = props.selectedTicker+'|'+response.data.listenKey;
 
@@ -95,13 +97,25 @@ const OpenOrders  = props => {
             name:'BitmartWebSocket', 
             component:'orders', 
             login:true, 
-            url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'
+            url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1',
+            transform: {
+                symbol:['toLowerCase', 'valueOf'],
+                stream:'orders',
+                interval:'',
+                frequency:''
+            } 
         }, 
         Binance: {
             name:'BinanceWebSocket', 
             component:'orders', 
             login:false, 
-            url:'wss://stream.binance.us:9443/ws/'
+            url:'wss://stream.binance.us:9443/ws/',
+            transform: {
+                symbol:['toLowerCase', 'valueOf'],
+                stream:'listenKey',
+                interval:'',
+                frequency:''
+            } 
         }
         }
       
@@ -112,7 +126,7 @@ const OpenOrders  = props => {
         //     config
         // )
 
-         client[props.data.name] = SocketFactory.createInstance(config[props.data.name],
+        client[props.data.name] = SocketFactory.createInstance(config[props.data.name],
             {selectedTicker:props.selectedTicker+endpoint},
             {
                 key:key,
@@ -125,7 +139,8 @@ const OpenOrders  = props => {
                 props.setData({
                     ...props.data,
                     asset:orders
-                });
+                }
+        );
             //console.log('CALLBACK DATA', spot);
              });
     // let  messageEvent = fromEvent(client[props.data.name].client, 'message');

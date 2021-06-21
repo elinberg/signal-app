@@ -43,28 +43,57 @@ useEffect(() => {
         });
 
         //console.log('exchange' ,props.exchange,props);
-        if(props.selectedTicker.length < 3){
+        if(props === undefined && propps.selectedTicker === undefined && props.selectedTicker.length < 3){
             return;
         }
 
-        let msg = '';
+        let endpoint = '';
 
         
         let client = [];
-        msg ='';
+        let msg ='';
         if(props.exchange.name === 'Binance'){
-            msg=props.selectedTicker.replace(/_/g,"").toLowerCase()+'@depth5@100ms';
+            endpoint=props.selectedTicker;
         }
-        const config = { Bitmart: {name:'BitmartWebSocket', component:'depth', login:false, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', component:'depth', login:false, url:'wss://stream.binance.us:9443/ws/'} };
-        client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name],  props,{key:'',apiName:'',secret:''}, [], msg , (depth) => {
-           //console.log('GOT DEPTH', depth)
-            setData({
-                ...data,
-                ...depth
-            });
+        const config = {
+            Bitmart: 
+        {
+            name:'BitmartWebSocket', 
+            component:'depth',
+            login:false, 
+            url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1',
+            transform: {symbol:['toUpperCase', 'valueOf'],stream:'depth5',interval:'_1m',frequency:''} 
+        }, 
+        Binance:
+            {
+                name:'BinanceWebSocket', 
+                component:'depth', 
+                login:false, 
+                url:'wss://stream.binance.us:9443/ws/',
+                transform: {symbol:['toLowerCase', 'valueOf'],stream:'@depth',interval:'5',frequency:'@100ms'} 
+            }
+        };
+        client[props.exchange.name] =  SocketFactory.createInstance(
+            config[props.exchange.name],
+            props,
+            {
+                key:'',
+                apiName:'',
+                secret:''
+            },
+            [],
+            endpoint,
+            (depth) => {
+           
+                setData({
+                    ...data,
+                    ...depth
+                });
+            
 
            
-        });
+            }
+        );
       
     
 

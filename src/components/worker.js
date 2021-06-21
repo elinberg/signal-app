@@ -60,15 +60,36 @@ onmessage = function (event) {
 				console.log('WORKER SENT OPEN ('+ subscriptionId +')', endpoint, {"props":{"selectedTicker":symbol}})
 				//let props={props:{"selectedTicker":symbol}}
 				
-			var config = { Bitmart: {name:'BitmartWebSocket', component:'kline', login:false, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, Binance: {name:'BinanceWebSocket', component:'kline', login:false, url:'wss://stream.binance.com:9443/ws/'}}
+			var config = {
+				Bitmart:{
+					name:'BitmartWebSocket',
+					component:'kline',
+					login:false,
+					url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1',
+					transform: {
+						symbol:['toUpperCase'],
+						stream:'@miniTicker',
+						interval:'',
+						frequency:''
+					}
+				},
+				Binance:{name:'BinanceWebSocket',
+					component:'kline',
+					login:false,
+					url:'wss://stream.binance.com:9443/ws/',
+					transform: {
+						symbol:['toLowerCase'],
+						stream:'@kline_',
+						interval:'1m',
+						frequency:''
+					}
+				}
+			}
 			client['Binance'] =  SocketFactory.createInstance(config['Binance'], {props:{"selectedTicker":symbol}}, { key:'',apiName:'',secret:''}, [], endpoint , (market) => {
 				//console.log("MARKET", market)
 				
 				postMessage(market);
 			
-			}, ()=>{ if(client.name === 'Binance'  ){
-				return 'wss://stream.binance.com:9443/ws/'
-					} 
 			});
 
 			var readyState

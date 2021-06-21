@@ -6,54 +6,118 @@ const _transform = require('./transformer')
 var endpoint
 var symbol, sym
 export default class BinanceWebSocket {
-    constructor(config, props, credentials, trades, endpoint, callback) {
+    constructor(config, props, credentials, update, symbol, callback) {
 
-        symbol = props.selectedTicker || "";
-        console.log('SYMBOL',props, symbol, endpoint || "6")
-
-        //this.endpoint = endpoint;
-if(endpoint=== undefined || endpoint.length<1) return
-        console.log('SYMBOL',props, symbol, endpoint || "6")
-
-        //[this.url,this.endpoint,this.symbol] = [config.url, endpoint, endpoint.split('@')[0]]
-        this.config = config;
-        this.configUrl = config.url
-        let sym
-        if (endpoint === null || endpoint === undefined ) {
-            //this.endpoint = endpoint
-            sym=props.selectedTicker
-
-        } else {
-            
-            sym=endpoint
-            //console.log('SYMBOL', this.symbol, this.endpoint || "")
-
+        if(symbol=== undefined ||symbol.length<1) return
+        if(!this.transformed){
+            this.symbolRaw = symbol;
         }
         
-        if (sym.match(/\|/g) !== null && sym.match(/\|/g).length > 0) {
-            if (sym.match(/\|/g).length === 1) {
-                this.symbol = sym.split('|')[0].replace('_','').toLowerCase()
-                this.endpoint = sym.split('|')[1]
-            }
-        } else if(sym.match(/\|/g) === null) {
-                this.endpoint = sym.replace('_','').toLowerCase()
 
-            if (sym.match(/@/g) !== null && sym.match(/@/g).length=== 1) {
-                this.symbol = sym.split('@')[0]
-                this.endpoint = sym
-            }
-            if (sym.match(/@/g) !== null && sym.match(/@/g).length=== 2) { //depth
-                this.symbol = sym.split('@')[0]
-                this.stream = sym.split('@')[1]
-                this.interval = sym.split('@')[2]
-                this.endpoint = sym
-            } else {
-                this.endpont=''
-            }
 
+        if(config=== undefined ||config.name.length<1) return
+        console.log('CONFIG',props,config,  config.name || "CONFIG NOT SET")
+        this.config = config;
+        this.name = config.name;
+        this.url = config.url
+        this.component = config.component
+        
+        
+        
+        //this.endpoint = endpoint;
+        if(props=== undefined ) return
+        console.log('PROPS',props || "PROPS NOT SET")
+        this.props = props;
+
+        if(credentials=== undefined ) return
+        console.log('CREDENTIALS',credentials || "CREDENTIALS NOT SET")
+        this.credentials = credentials
+        
+        
+        
+        console.log('SYMBOL',props, symbol,  symbol || "SYMBOL NOT SET")
+        if(symbol=== undefined || symbol.length<1) return  /// bail out
+        this.rawSymbol = symbol
+
+
+        if(callback!== undefined ){
+            this.callback = callback
+        } 
+        
+        
+        //[this.url,this.endpoint,this.symbol] = [config.url, endpoint, endpoint.split('@')[0]]
+
+        // if (endpoint === null || endpoint === undefined ) {
+        //     //this.endpoint = endpoint
+        //     sym=props.selectedTicker
+
+        // } else {
+            
+        //     sym=endpoint
+        //     //console.log('SYMBOL', this.symbol, this.endpoint || "")
+
+        // }
+        this.coin = this.rawSymbol.split('_')[0]
+        this.transform = this.config.transform;
+        let tmp= new String(this.symbolRaw)
+        if(!this.transformed){
+            this.transform.symbol.forEach(transform => {
+                //console.log('SYMBOL EX',this.symbol)
+                //this.symbol = new String(this.rawSymbol)
+               tmp = tmp[transform]()
+               
+                this.transformed=true
+               //console.log('XFORMER SYMBOL',this.symbol,proto)
+               
+            });
+        
+        }
+        this.symbol = tmp
+        this.endpoint = this.symbol + 
+        this.config.transform.stream + 
+        this.config.transform.interval || "" +
+        this.config.transform.frequency || "" 
+        
+
+    
+        console.log('ENDPOINT WORKING?', this.endpoint)
+        if (this.rawSymbol.match(/\|/g) !== null && rawSymbol.match(/\|/g).length > 0) { //listenKey
+            // if (symbol.match(/\|/g).length === 1) {
+            //     this.symbolLower = this.rawSymbol.split('|')[0].replace('_','').toLowerCase()
+            //     this.endpoint = this.symbol.split('|')[1]
+            //     this.currency = this.endpoint.split('_')[1]
+                
+            // }
+        } else {
+            // if(this.component === 'depth'){
+            //     this.endpoint = ''
+            // }
+        
+        // if(this.rawSymbol.match(/\|/g) === null) {
+                
+
+        //     if (this.rawSymbol.match(/@/g) !== null && this.rawSymbol.match(/@/g).length=== 1) {
+        //         this.symbol = this.rawSymbol.split('@')[0]
+        //         this.endpoint = this.rawSymbol.split('@')[1]
+        //         this.currency = this.endpoint.split('_')[1]
+        //     } else if (this.rawSymbol.match(/@/g) !== null && this.rawSymbol.match(/@/g).length=== 2) { //depth
+        //         this.symbol = symbol.split('@')[0]
+        //         this.stream = symbol.split('@')[1]
+        //         this.interval = symbol.split('@')[2]
+        //         this.endpoint = this.symbol + '@' +this.stream + '@' + this.interval
+        //     } else {
+        //         console.log('WHAT AM I MISSING', this.symbolRaw, this.endpoint||'MISSING ENDPOINT')
+        //         return;
+        //     }
+
+        
         }
 
-        console.log('SYMBOL/ENDPOINT',props, endpoint,sym,this.endpoint)
+       
+        //console.log('XFORMER WORKING', this.symbol)
+        
+
+        console.log('SYMBOL/ENDPOINT',this.component,this.symbolRaw,this.symbol, this.endpoint)
         // if(endpoint.length < 1){
         //     this.endpoint = endpoint
 
@@ -67,38 +131,39 @@ if(endpoint=== undefined || endpoint.length<1) return
         //         this.symbol = endpoint.split('@')[0]
         //     }
         // }
+if(!this.url || !this.endpoint ) return
 
-
-
-        //this.stream =
-        this.connectUrl = config.url
-
-        console.log('connecting to',config.url+endpoint)
-        this.client = new RobustWebSocket(config.url+endpoint, null, {
+        console.log('connecting to',this.url+this.endpoint)
+        this.client = new RobustWebSocket(this.url+this.endpoint, null, {
             timeout: 60000,
-            shouldReconnect: function (event, ws) {
-                console.log('Reconnecting to ' + this.connectUrl + this.endpoint + ' ' + ' code:' + event.code + ' attempts:' + ws.attempts)
+            shouldReconnect:function()  { 
+                if(!this.url || !this.endpoint){
+                    return;
+                }
+                return function (event, ws) {
+                console.log('Reconnecting to ' + this.url + this.endpoint + ' ' + ' code:' + event.code + ' attempts:' + ws.attempts)}
+                
                 if (event.code === 1008 || event.code === 1011) return
                 return [0, 3000, 10000][ws.attempts]
             }
         }
         )
-        console.log('SYM', props)
-        this.name = 'Binance';
-        this.config = config
+        console.log('NAME', this.name)
+        //this.name = 'Binance';
+        //this.config = config
         //this.symbol = props.selectedTicker
         //this.endpoint = endpoint || 'btcusd@kline_1m'
         this.event = '';
         this.lastEvent = 'first event';
         this.eventMessage = '';
         this.subId = -1
-        this.tickers = props.tickers || [];
-        this.symbolRaw = props.selectedTicker || 'DOGE_USDT'
-        this.component = this.config.component;
+        this.tickers = this.props.tickers || [];
+        //this.symbolRaw = props.selectedTicker || 'DOGE_USDT'
+        //this.component = this.config.component;
         this.login = this.config.login || false;
-        this.trades = trades || [];
-        this.prevPrices = trades;
-        this.callback = callback || {}
+        this.update = update || [];
+        this.prevPrices = update;
+        this.callback = this.callback || (() => {})
         this.ping_id = 0;
         this.ping_time = 1000000
         //this.symbol = props.selectedTicker || 'DOGEUSDT';
@@ -106,13 +171,14 @@ if(endpoint=== undefined || endpoint.length<1) return
         this.client.binaryType = 'blob'; //blob / text
         this.pingIn = 'ping';
         this.pingOut = 'pong';
-        this.subscribeMessage = this.getSubscribeMessage(this.symbol);
-        this.unsubscribeMessage = this.getUnsubscribeMessage(this.symbol);
+        this.subscribeMessage = this.getSubscribeMessage(this.symbolLower);
+        this.unsubscribeMessage = this.getUnsubscribeMessage(this.symbolLower);
         //this.loginMessage = this.getLoginMessage(symbol);
         this.transformer = new _transform(this.name);
-        this.key = credentials.key;
-        this.secret = credentials.secret;
-        this.apiName = credentials.apiName;
+        this.key = this.credentials.key;
+        this.secret = this.credentials.secret;
+        this.apiName = this.credentials.apiName;
+
         this.client.addEventListener('open', function (event) {
             this.event = 'open'
             this.lastEvent = 'open'
@@ -146,14 +212,14 @@ if(endpoint=== undefined || endpoint.length<1) return
             //let msg = this.getSubscribeMessage(symbol)
             // this.client.send(msg);
             let json = JSON.parse(ev.data)
-            if (this.component === 'ticker') {
+            if (this.component === 'spot') { //spot
                 //console.log('SPOT SET')
 
                 this.setSpotData(json);
             } else if (this.component === 'depth') {
                 //console.log('DEPTH SET')
                 this.setDepthData(json);
-            } else if (this.component === 'market') {
+            } else if (this.component === 'trade') {
                 //console.log('MARKET SET')
                 this.setMarketData(json);
             } else if (this.component === 'kline') {
@@ -166,7 +232,7 @@ if(endpoint=== undefined || endpoint.length<1) return
                 // console.log('BULLSHIT! jsonId,event,jsonSymbol',json.id||'idunset', this.event||'evunset', this.lastEvent||'lastevunset', json.s||'symunset',this.eventMessage||'evMsgNotset' )
                 if (json.id === undefined && this.event === 'subscribe' && json.s !== undefined) {
                     console.log('KLINE SET EVENT', this.event, this.eventMessage, this.lastEvent, json.s, this.subId)
-
+                    this.component='kline'
                     this.setKlineData(json);
                 } else {
                     //if(this.subId === -1){
@@ -214,11 +280,11 @@ if(endpoint=== undefined || endpoint.length<1) return
 
     setOpenOrders(json) {
 
-
+        this.component = 'orders'
         console.log('setOpenOrders', Array.isArray(json), typeof json)
         if (json !== undefined || !Array.isArray(json)) {
 
-
+            
             //console.log('pre pre Transform', json)
             //console.log('TICKERS', this.tickers[this.name], this.symbol)
 
@@ -227,14 +293,14 @@ if(endpoint=== undefined || endpoint.length<1) return
 
             let newTrade = this.transformer.getTradeStream(json, this.tickers[this.name])
             if (newTrade.state === 'CANCELED') {
-                this.trades = this.trades.filter(trade => trade.order_id !== newTrade.order_id)
+                this.update = this.update.filter(trade => trade.order_id !== newTrade.order_id)
             } else {
 
-                this.trades.unshift(newTrade)
+                this.update.unshift(newTrade)
 
             }
 
-            this.callback(this.trades)
+            this.callback(this.update)
 
 
         }
@@ -242,6 +308,7 @@ if(endpoint=== undefined || endpoint.length<1) return
 
 
     setSpotData(json) {
+        this.component = 'spot'
 
         if (json !== undefined) {
 
@@ -260,7 +327,7 @@ if(endpoint=== undefined || endpoint.length<1) return
     }
     setDepthData(json) {
 
-
+        this.component = 'depth'
 
         if (json !== undefined) {
 
@@ -276,7 +343,7 @@ if(endpoint=== undefined || endpoint.length<1) return
 
     setMarketData(json) {
 
-
+        this.component = 'market'
         //console.log('setMarketData', json)
         if (json !== undefined) {
 
@@ -304,7 +371,7 @@ if(endpoint=== undefined || endpoint.length<1) return
     }
     setKlineData(json) {
 
-
+        this.component = 'kline'
         //console.log('setMarketData', json)
         if (json !== undefined) {
 
@@ -348,6 +415,7 @@ if(endpoint=== undefined || endpoint.length<1) return
 
 
     close() {
+        if(this.client === undefined) return;
         this.event = 'close'
         this.lastEvent = 'close'
         this.eventMessage = 'close'
@@ -373,7 +441,7 @@ if(endpoint=== undefined || endpoint.length<1) return
             return url+ endpoint
         } else {
             console.log(this.config.url,this.endpoint)
-            return this.config.url + this.endpoint ;
+            return this.url + this.endpoint ;
         }
        
         
@@ -410,6 +478,7 @@ if(endpoint=== undefined || endpoint.length<1) return
             } else if (this.client.readyState === 1) {
                 let json = this.parseEndpoint(msg)
                 this.symbol = json.symbol
+                console.log('EP SET', json.endpoint)
                 this.endpoint = json.endpoint
                 this.subId = json.id
                 //this.client.endpoint= json.endpoint

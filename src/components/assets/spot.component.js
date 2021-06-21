@@ -9,22 +9,22 @@ import SocketFactory from './socket.factory';
 // let losses = [];
 let endpoint;
 const Spot = props => {
-//const { state, dispatch } = React.useContext(AuthContext); 
-const history = useHistory();
-const [intervalId, setIntervalId ] = useState('');
-const [ data, setData ]= useState( {})
-//const [ prices, setPrices ]= useState( [])
-//const [ prevPrice, setPrevPrice ]= useState('0.00')  ;    
+    //const { state, dispatch } = React.useContext(AuthContext); 
+    const history = useHistory();
+    const [intervalId, setIntervalId] = useState('');
+    const [data, setData] = useState({})
+    //const [ prices, setPrices ]= useState( [])
+    //const [ prevPrice, setPrevPrice ]= useState('0.00')  ;    
 
 
 
-const onPriceClick = e => {
-    console.log('Price Click', e.target.innerText);
-    let event = {target:{value:e.target.innerText}}
-    props.onChangePrice(event);
-}
+    const onPriceClick = e => {
+        console.log('Price Click', e.target.innerText);
+        let event = { target: { value: e.target.innerText } }
+        props.onChangePrice(event);
+    }
 
-//useEffect(()=>{
+    //useEffect(()=>{
     //let prices = [];
     // if(props !== undefined && props.selectedTicker !== undefined && props.selectedTicker.length > 0){
 
@@ -34,7 +34,7 @@ const onPriceClick = e => {
     //             losses.push(parseFloat(data.prevPrice)-parseFloat(data.lastPrice))
     //             console.log('Losses',parseFloat(data.prevPrice)-parseFloat(data.lastPrice))
     //         }
-            
+
     //     } else if(data.priceStyle==='text-success'){
     //         if(gains.length < 14){
     //             gains.push(parseFloat(data.lastPrice)-parseFloat(data.prevPrice))
@@ -60,137 +60,164 @@ const onPriceClick = e => {
     //     losses=[]
     //     }
     //     //prices = [];
-        
+
 
     // } else {
-        
+
     //     count = 0;
 
     // count++
     // console.log(count);
     // }//if selectedTicker
-     
-//},[data.lastPrice, props.selectedTicker])
+
+    //},[data.lastPrice, props.selectedTicker])
 
 
 
-useEffect(() => {
+    useEffect(() => {
 
 
         //console.log('HANDLESTATE')
-  const ex = JSON.parse(localStorage.getItem('exchanges'))
+        const ex = JSON.parse(localStorage.getItem('exchanges'))
         //console.log('local', ex)
-   let thisExchange = ex.filter(exchange => 
+        let thisExchange = ex.filter(exchange =>
             props.exchange.name === exchange.name
         )
-        if(thisExchange){ 
+        if (thisExchange) {
         } else {
-            thisExchange = [{ 
+            thisExchange = [{
                 name: props.exchange.name,
                 apiKey: '',
-                secret: '',}];        
+                secret: '',
+            }];
         }
         setData({
             ...data,
-            spot:{
-            high24hr: '',
-            low24hr: '',
-            open24hr: '',
-            volume24hr: '',
-            lastPrice:'',
-            priceStyle:'' ,
-            prevPrice:'0.00' ,
-         
-        }});
-
-       
-
-        
-        // if(props.selectedTicker.length < 3 && props.selectedTicker !== undefined){
-        //     //return;
-        // }
-
-        
-console.log('PROPS', props)
-        if(props.exchange.name === 'Binance' && props.selectedTicker !== undefined && props.selectedTicker.length > 0){
-            endpoint=props.selectedTicker.replace(/_/g,"").toLowerCase()+'@miniTicker';
-        } else {
-            endpoint  =props.selectedTicker
-            if(endpoint.length < 1)return
-            console.log('GOT HERE', endpoint)
-        }
-        let client = [];
-       // client[props.exchange.name] = new WebSocketConnection(props,setData, data ,msg );
-       let prevPrices=[];
-        const config = { Bitmart: {name:'BitmartWebSocket', component:'ticker', login:false, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, 
-        Binance: {name:'BinanceWebSocket', component:'ticker', login:false, url:'wss://stream.binance.us:9443/ws/'} };
-        
-       
-        client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name],  props,{key:'',apiName:'',secret:''}, prevPrices, endpoint , (spot) => {
-            
-            props.PriceCallback(spot.lastPrice)
-            
-            
-            setData({
-                ...data,
-                spot:spot
-            });
-
-            
-            //console.log('CALLBACK DATA', spot);
-        });
- 
-       
-
-        return () => {
-            
-            setData({
-                ...data,
-                spot:{
+            spot: {
                 high24hr: '',
                 low24hr: '',
                 open24hr: '',
                 volume24hr: '',
-                lastPrice:'',
-                priceStyle:'' ,
-                prevPrice:'0.00' ,
-             
-            }});
+                lastPrice: '',
+                priceStyle: '',
+                prevPrice: '0.00',
+
+            }
+        });
+
+
+
+
+        // if(props.selectedTicker.length < 3 && props.selectedTicker !== undefined){
+        //     //return;
+        // }
+
+
+        console.log('PROPS', props)
+        if (props.exchange.name === 'Binance' && props.selectedTicker !== undefined && props.selectedTicker.length > 0) {
+            endpoint = props.selectedTicker;
+        } else {
+            endpoint = props.selectedTicker
+            if (endpoint.length < 1) return
+            console.log('GOT HERE', endpoint)
+        }
+        let client = [];
+        // client[props.exchange.name] = new WebSocketConnection(props,setData, data ,msg );
+        let prevPrices = [];
+        const config = {
+            Bitmart: {
+                name: 'BitmartWebSocket',
+                component: 'spot',
+                login: false, url:
+                'wss://ws-manager-compress.bitmart.com?protocol=1.1',
+            transform: {
+                symbol:['toUpperCase', 'valueOf'],
+                stream:'ticker',
+                interval:'',
+                frequency:''
+            }
+            },
+            Binance:
+            { name: 'BinanceWebSocket',
+            component: 'spot',
+            login: false,
+            url: 'wss://stream.binance.us:9443/ws/',
+            transform: {
+                symbol:['toLowerCase', 'valueOf'],
+                stream:'@miniTicker',
+                interval:'',
+                frequency:''
+            }
+            }
+        };
+
+
+        client[props.exchange.name] = SocketFactory.createInstance(config[props.exchange.name], props, { key: '', apiName: '', secret: '' }, prevPrices, endpoint, (spot) => {
+
+            props.PriceCallback(spot.lastPrice)
+
+
+            setData({
+                ...data,
+                spot: spot
+            });
+
+
+            //console.log('CALLBACK DATA', spot);
+        });
+
+
+
+        return () => {
+
+            setData({
+                ...data,
+                spot: {
+                    high24hr: '',
+                    low24hr: '',
+                    open24hr: '',
+                    volume24hr: '',
+                    lastPrice: '',
+                    priceStyle: '',
+                    prevPrice: '0.00',
+
+                }
+            });
 
             client[props.exchange.name].close()
             console.log('LEAVING')
-        }; 
+        };
 
-},[props.selectedTicker]);
-if(data === undefined || data.spot  === undefined|| data.spot.priceStyle  === undefined  ){
-    return null;
-}
-
-
-//console.log(count++) 
-        return (
-            
-            <div className="container" style={{marginTop: '2px', marginBottom: '2px'}}>
-                
-                 <div onClick={onPriceClick} style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', height:'23px'}} className="float-left"><h6 className={data.spot.priceStyle}>{data.spot.lastPrice}</h6></div>
-                <div style={{width:'28%', paddingLeft:'1px'}} className="float-left"><h6> {data.spot.baseAsset}</h6></div>
-
-                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', marginTop:'0px' }} className="tiny pt-1 float-left"><small>{data.spot.high24hr}</small></div>
-                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px' }}  className="tiny-label pt-1 float-left"><small >High</small></div>
-
-                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', marginTop:'0px'}} className="tiny float-left"><small>{data.spot.low24hr}</small></div>
-                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px' }}  className="tiny-label float-left"><small> Low</small></div>
-
-                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', color:'', marginTop:'0px' }} className="tiny float-left"><small>{data.spot.open24hr}</small></div>
-                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px' }}  className="tiny-label float-left"><small>Open</small></div>
+    }, [props.selectedTicker]);
+    if (data === undefined || data.spot === undefined || data.spot.priceStyle === undefined) {
+        return null;
+    }
 
 
-                <div style={{width:'72%', paddingLeft:'1px',paddingTop:'1px', color:'', marginTop:'0px'}} className="tiny float-left"><small>{data.spot.volume24hr}</small></div>
-                <div style={{width:'28%',color:'',paddingTop:'1px', marginTop:'0px'}}  className="tiny-label float-left"><small> Volume</small></div>
+    //console.log(count++) 
+    return (
 
-            </div>
-            
-        );
-        
+        <div className="container" style={{ marginTop: '2px', marginBottom: '2px' }}>
+
+            <div onClick={onPriceClick} style={{ width: '72%', paddingLeft: '1px', paddingTop: '1px', height: '23px' }} className="float-left"><h6 className={data.spot.priceStyle}>{data.spot.lastPrice}</h6></div>
+            <div style={{ width: '28%', paddingLeft: '1px' }} className="float-left"><h6> {data.spot.baseAsset}</h6></div>
+
+            <div style={{ width: '72%', paddingLeft: '1px', paddingTop: '1px', marginTop: '0px' }} className="tiny pt-1 float-left"><small>{data.spot.high24hr}</small></div>
+            <div style={{ width: '28%', color: '', paddingTop: '1px', marginTop: '0px' }} className="tiny-label pt-1 float-left"><small >High</small></div>
+
+            <div style={{ width: '72%', paddingLeft: '1px', paddingTop: '1px', marginTop: '0px' }} className="tiny float-left"><small>{data.spot.low24hr}</small></div>
+            <div style={{ width: '28%', color: '', paddingTop: '1px', marginTop: '0px' }} className="tiny-label float-left"><small> Low</small></div>
+
+            <div style={{ width: '72%', paddingLeft: '1px', paddingTop: '1px', color: '', marginTop: '0px' }} className="tiny float-left"><small>{data.spot.open24hr}</small></div>
+            <div style={{ width: '28%', color: '', paddingTop: '1px', marginTop: '0px' }} className="tiny-label float-left"><small>Open</small></div>
+
+
+            <div style={{ width: '72%', paddingLeft: '1px', paddingTop: '1px', color: '', marginTop: '0px' }} className="tiny float-left"><small>{data.spot.volume24hr}</small></div>
+            <div style={{ width: '28%', color: '', paddingTop: '1px', marginTop: '0px' }} className="tiny-label float-left"><small> Volume</small></div>
+
+        </div>
+
+    );
+
 }
 export default Spot;

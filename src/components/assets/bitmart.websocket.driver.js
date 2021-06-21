@@ -7,7 +7,9 @@ const _transform = require('./transformer')
 
 export default class BitmartWebSocket {
     constructor(  config, props, credentials, trades, endpoint, callback){
+        return
         //console.log("BITMART PROPS", config, props, credentials, trades)
+        //return;
         let symbol = props.selectedTicker;
         this.client = new RobustWebSocket( config.url, null, {
             timeout: 60000,
@@ -27,6 +29,8 @@ export default class BitmartWebSocket {
         this.ping_id = 0 ;
         this.ping_time = 10000
         this.symbol =  props.selectedTicker || 'SHIB_USDT';
+        this.symbolLower =  props.selectedTicker.toLowerCase() || 'shib_usdt';
+        this.symbolUpper =  props.selectedTicker.toUpperCase() || 'SHIB_USDT';
         this.url = config.url || 'wss://ws-manager-compress.bitmart.com?protocol=1.1';
         this.client.binaryType = 'blob'; //blob / text
         this.pingText =  'pong';
@@ -38,19 +42,19 @@ export default class BitmartWebSocket {
         this.key = credentials.key;
         this.secret = credentials.secret;
         this.apiName = credentials.apiName;
-        if(this.component === 'miniTicker') this.client.addEventListener('open', function(event){
+        if(this.component === 'spot') this.client.addEventListener('open', function(event){
             //console.log("RAW OPEN SPOT S B O", this.component, event);
             
         });
-        if(this.component === 'depth5') this.client.addEventListener('open', function(event){
+        if(this.component === 'depth') this.client.addEventListener('open', function(event){
             //console.log("RAW OPEN DEPTH S B O", this.component, event);
             
         });
-        if(this.component === 'minTicker') this.client.addEventListener('close', function(event){
+        if(this.component === 'spot') this.client.addEventListener('close', function(event){
             //console.log("RAW CLOSE SPOT S B O", this.component, event);
             
         });
-        if(this.component === 'depth5') this.client.addEventListener('close', function(event){
+        if(this.component === 'depth') this.client.addEventListener('close', function(event){
             //console.log("RAW CLOSE SPOT S B O", this.component, event);
             
         });
@@ -62,7 +66,7 @@ export default class BitmartWebSocket {
         });
         let comp = this.component
         
-        if(this.component === 'miniTicker') this.client.addEventListener('message', function(event){
+        if(this.component === 'spot') this.client.addEventListener('message', function(event){
            
              //console.log(" RAW MESSAGE SPOT S B O ", typeof event.data, event.data, event )
         
@@ -74,7 +78,7 @@ export default class BitmartWebSocket {
        
        });
 
-        if(this.component === 'depth5') this.client.addEventListener('message', function(event){
+        if(this.component === 'depth') this.client.addEventListener('message', function(event){
            
             //console.log(" RAW MESSAGE DEPTH S B O ", typeof event.data, event.data, event )
        
@@ -113,7 +117,7 @@ export default class BitmartWebSocket {
                 if(this.component === 'orders'){
                     //console.log('ORDERS SET')
                     this.setOpenOrders(json, props);
-                } else  if(this.component === 'ticker'){
+                } else  if(this.component === 'spot'){
                     //console.log('SPOT SET')
                     this.setSpotData(json);
                 } else  if(this.component === 'depth'){
@@ -269,7 +273,13 @@ export default class BitmartWebSocket {
             } else if(this.component === 'depth5'){
                 msg = {"op": "subscribe", "args": ["spot/depth5:"+symbol]}
             } else if(this.component === 'trade'){
-                msg = {"op": "subscribe", "args": ["spot/trade:"+symbol]} //market
+                msg = {"op": "subscribe", "args": ["spot/kline:"+symbol]} //market
+            }else if(this.component === 'kline'){
+                this.prefix = ''
+                this.suffix = '_1m'
+                this.conjunction = '@'
+                this.symbol = this.symbolUpper
+                //msg = {"op": "subscribe", "args": ["spot/kline:"+symbol]} //market
             } else {
                 msg = '';
             }
