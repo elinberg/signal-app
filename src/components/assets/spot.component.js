@@ -123,7 +123,7 @@ console.log('PROPS', props)
        // client[props.exchange.name] = new WebSocketConnection(props,setData, data ,msg );
        let prevPrices=[];
         const config = { Bitmart: {name:'BitmartWebSocket', component:'ticker', login:false, url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1'}, 
-        Binance: {name:'BinanceWebSocket', component:'ticker', login:false, url:'wss://stream.binance.us:9443/ws/'+endpoint} };
+        Binance: {name:'BinanceWebSocket', component:'ticker', login:false, url:'wss://stream.binance.us:9443/ws/'} };
         
        
         client[props.exchange.name] =  SocketFactory.createInstance(config[props.exchange.name],  props,{key:'',apiName:'',secret:''}, prevPrices, endpoint , (spot) => {

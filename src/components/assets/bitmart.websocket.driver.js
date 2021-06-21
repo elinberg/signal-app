@@ -38,19 +38,19 @@ export default class BitmartWebSocket {
         this.key = credentials.key;
         this.secret = credentials.secret;
         this.apiName = credentials.apiName;
-        if(this.component === 'ticker') this.client.addEventListener('open', function(event){
+        if(this.component === 'miniTicker') this.client.addEventListener('open', function(event){
             //console.log("RAW OPEN SPOT S B O", this.component, event);
             
         });
-        if(this.component === 'depth') this.client.addEventListener('open', function(event){
+        if(this.component === 'depth5') this.client.addEventListener('open', function(event){
             //console.log("RAW OPEN DEPTH S B O", this.component, event);
             
         });
-        if(this.component === 'ticker') this.client.addEventListener('close', function(event){
+        if(this.component === 'minTicker') this.client.addEventListener('close', function(event){
             //console.log("RAW CLOSE SPOT S B O", this.component, event);
             
         });
-        if(this.component === 'depth') this.client.addEventListener('close', function(event){
+        if(this.component === 'depth5') this.client.addEventListener('close', function(event){
             //console.log("RAW CLOSE SPOT S B O", this.component, event);
             
         });
@@ -62,19 +62,19 @@ export default class BitmartWebSocket {
         });
         let comp = this.component
         
-        if(this.component === 'ticker') this.client.addEventListener('message', function(event){
+        if(this.component === 'miniTicker') this.client.addEventListener('message', function(event){
            
              //console.log(" RAW MESSAGE SPOT S B O ", typeof event.data, event.data, event )
         
         });
 
-        if(this.component === 'market') this.client.addEventListener('message', function(event){
+        if(this.component === 'trade') this.client.addEventListener('message', function(event){
            
             //console.log(" RAW MESSAGE MARKET S B O ", typeof event.data, event.data, event )
        
        });
 
-        if(this.component === 'depth') this.client.addEventListener('message', function(event){
+        if(this.component === 'depth5') this.client.addEventListener('message', function(event){
            
             //console.log(" RAW MESSAGE DEPTH S B O ", typeof event.data, event.data, event )
        
@@ -119,7 +119,7 @@ export default class BitmartWebSocket {
                 } else  if(this.component === 'depth'){
                     //console.log('DEPTH SET')
                     this.setDepthData(json);
-                } else  if(this.component === 'market'){
+                } else  if(this.component === 'trade'){ //market
                     //console.log('DEPTH SET')
                     this.setMarketData(json);
                 }
@@ -264,12 +264,12 @@ export default class BitmartWebSocket {
             this.symbol = symbol;
             if(this.component === 'orders'){
                 msg = {"op": "subscribe", "args":["spot/user/order:"+symbol]}
-            } else if(this.component === 'ticker'){
+            } else if(this.component === 'miniTicker'){
                 msg = {"op": "subscribe", "args":["spot/ticker:"+symbol]}
-            } else if(this.component === 'depth'){
+            } else if(this.component === 'depth5'){
                 msg = {"op": "subscribe", "args": ["spot/depth5:"+symbol]}
-            } else if(this.component === 'market'){
-                msg = {"op": "subscribe", "args": ["spot/trade:"+symbol]}
+            } else if(this.component === 'trade'){
+                msg = {"op": "subscribe", "args": ["spot/trade:"+symbol]} //market
             } else {
                 msg = '';
             }
@@ -281,11 +281,11 @@ export default class BitmartWebSocket {
             let msg;
             if(this.component === 'orders'){
                 msg = {"op": "unsubscribe", "args":["spot/user/order:"+symbol]}
-            } else if(this.component === 'ticker'){
+            } else if(this.component === 'miniTicker'){
                 msg = {"op": "unsubscribe", "args":["spot/ticker:"+symbol]}
-            } else if(this.component === 'depth'){
+            } else if(this.component === 'depth5'){
                 msg = {"op": "unsubscribe", "args": ["spot/depth5:"+symbol]}
-            } else if(this.component === 'market'){
+            } else if(this.component === 'trade'){
                 msg = {"op": "unsubscribe", "args": ["spot/trade:"+symbol]}
             } 
            // console.log('getUnSubscribeMessage', msg )
