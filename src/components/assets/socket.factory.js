@@ -7,7 +7,8 @@ const ELEMENTS = {
 
 export default class SocketFactory {
     static createInstance(config, props,credentials,trades, endpoint, callback) {
-        console.log('createInstance',config, props,credentials,trades,endpoint)
+        
+        console.log('createInstance',config.component)
         const socketCreator = ELEMENTS[config.name];
         const socket = socketCreator ? new socketCreator(config, props,credentials,trades,endpoint, callback||[]) : null;
 

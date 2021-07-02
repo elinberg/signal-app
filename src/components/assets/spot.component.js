@@ -128,8 +128,10 @@ const Spot = props => {
             Bitmart: {
                 name: 'BitmartWebSocket',
                 component: 'spot',
-                login: false, url:
-                'wss://ws-manager-compress.bitmart.com?protocol=1.1',
+                instance:0,
+                login: false,
+                subscribe:true,
+                url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1',
             transform: {
                 symbol:['toUpperCase', 'valueOf'],
                 stream:'ticker',
@@ -137,13 +139,18 @@ const Spot = props => {
                 frequency:''
             }
             },
-            Binance:
-            { name: 'BinanceWebSocket',
-            component: 'spot',
-            login: false,
-            url: 'wss://stream.binance.us:9443/ws/',
-            transform: {
-                symbol:['toLowerCase', 'valueOf'],
+            Binance:{ 
+                name: 'BinanceWebSocket',
+                component: 'spot',
+                instance:1,
+                login: false,
+                subscribe:false,
+                url: 'wss://stream.binance.us:9443/ws/',
+                transform: {
+                    symbol:[
+                        'toLowerCase',
+                        "replace|_"
+                    ],
                 stream:'@miniTicker',
                 interval:'',
                 frequency:''
@@ -151,25 +158,34 @@ const Spot = props => {
             }
         };
 
-
-        client[props.exchange.name] = SocketFactory.createInstance(config[props.exchange.name], props, { key: '', apiName: '', secret: '' }, prevPrices, endpoint, (spot) => {
-
-            props.PriceCallback(spot.lastPrice)
-
-
-            setData({
-                ...data,
-                spot: spot
-            });
-
-
+console.log('PZ', props)
+        client[props.exchange.name] = SocketFactory.createInstance(
+            config[props.exchange.name],
+            props,
+                {
+                    key: '',
+                    apiName:'',
+                    secret: ''
+                },
+                prevPrices,
+                endpoint,
+                (spot) =>
+                {
+            props.PriceCallback(spot)
+                console.log('SPOT', spot)
+                setData({
+                    ...data,
+                    spot: spot,
+                    base:props.selectedTicker.split('_')[1]
+                });
             //console.log('CALLBACK DATA', spot);
         });
 
 
 
         return () => {
-
+            client[props.exchange.name].close()
+            client[props.exchange.name]={}
             setData({
                 ...data,
                 spot: {
@@ -184,7 +200,7 @@ const Spot = props => {
                 }
             });
 
-            client[props.exchange.name].close()
+            
             console.log('LEAVING')
         };
 
@@ -200,7 +216,7 @@ const Spot = props => {
         <div className="container" style={{ marginTop: '2px', marginBottom: '2px' }}>
 
             <div onClick={onPriceClick} style={{ width: '72%', paddingLeft: '1px', paddingTop: '1px', height: '23px' }} className="float-left"><h6 className={data.spot.priceStyle}>{data.spot.lastPrice}</h6></div>
-            <div style={{ width: '28%', paddingLeft: '1px' }} className="float-left"><h6> {data.spot.baseAsset}</h6></div>
+            <div style={{ width: '28%', paddingLeft: '1px' }} className="float-left"><h6> {data.base}</h6></div>
 
             <div style={{ width: '72%', paddingLeft: '1px', paddingTop: '1px', marginTop: '0px' }} className="tiny pt-1 float-left"><small>{data.spot.high24hr}</small></div>
             <div style={{ width: '28%', color: '', paddingTop: '1px', marginTop: '0px' }} className="tiny-label pt-1 float-left"><small >High</small></div>

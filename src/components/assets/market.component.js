@@ -52,26 +52,33 @@ const Market = props => {
         const config = {
             Bitmart: {
                 name: 'BitmartWebSocket',
-                component: 'trade',
+                component: 'market',
+                instance:props.instance,
                 login: false,
+                subscribe:true,
                 url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1',
                 transform: {
                     symbol:['toUpperCase', 'valueOf'],
-                    stream:'order',
+                    stream:'order', //?
                     interval:'',
                     frequency:''
                 } 
             },
             Binance: {
                 name: 'BinanceWebSocket',
-                component: 'trade',
+                component: 'market',
+                instance:props.instance,
                 login: false,
+                subscribe:false,
                 url: 'wss://stream.binance.us:9443/ws/',
                 transform: {
-                    symbol:['toLowerCase', 'valueOf'],
-                    stream:'',
-                    interval:'',
-                    frequency:''
+                    symbol:[
+                        'toLowerCase',
+                        "replace|_"
+                    ],
+                stream:'@aggTrade', 
+                interval:'',
+                frequency:'' //listenKey
                 } 
             }
         };
@@ -85,7 +92,8 @@ const Market = props => {
             },
             [],
             symbol,
-            (market) => {
+            market => {
+                console.log('MARKET',market)
                 data.market.unshift(market)
                 if (data.market.length > 9) {
                     data.market.splice(9, 1);
@@ -94,7 +102,9 @@ const Market = props => {
                     ...data,
 
                 })
-            });
+            }
+
+            );
 
 
         return () => {
@@ -107,7 +117,7 @@ const Market = props => {
             client[props.exchange.name].close()
 
 
-            console.log('Leaving', msg);
+            console.log('Leaving');
         }
 
     }, [props.selectedTicker]);
@@ -128,7 +138,7 @@ const Market = props => {
                     } else {
                         sideClass = 'text-danger';
                     }
-                    return <li className="tiny" key={index} style={{ whiteSpace: 'nowrap' }}><small onClick={onPriceClick} className={sideClass} >{value.price}</small> <small className="" >{value.size.split('.')[0]}</small></li>
+                    return <li className="tiny" key={index} style={{ whiteSpace: 'nowrap' }}><small onClick={onPriceClick} className={sideClass} >{value.price}</small> <small className="" >{parseFloat(value.size)}</small></li>
                 })}
             </ul>
 

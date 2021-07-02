@@ -7,20 +7,29 @@ var endpoint
 var symbol, sym
 export default class BinanceWebSocket {
     constructor(config, props, credentials, update, symbol, callback) {
-
-        if(symbol=== undefined ||symbol.length<1) return
-        if(!this.transformed){
-            this.symbolRaw = symbol;
+        if(this.components === undefined){
+            this.components = [] 
         }
+
+       // console.log('BINANCE CFG,PROPS,SYMBOL' , config,props,symbol)
+        
+        if(config.component !== 'order' && (symbol=== undefined ||symbol.length<1)) return
+        // if(!this.transformed){
+             this.symbolRaw = symbol;
+             this.symbol = symbol;
+        // }
         
 
 
         if(config=== undefined ||config.name.length<1) return
-        console.log('CONFIG',props,config,  config.name || "CONFIG NOT SET")
+       // console.log('CONFIG',props,config,  config.name || "CONFIG NOT SET")
         this.config = config;
-        this.name = config.name;
+        this.name = config.name.replace('WebSocket','');
         this.url = config.url
         this.component = config.component
+        this.instance = config.instance
+        
+        
         
         
         
@@ -29,112 +38,69 @@ export default class BinanceWebSocket {
         console.log('PROPS',props || "PROPS NOT SET")
         this.props = props;
 
+    
+
         if(credentials=== undefined ) return
         console.log('CREDENTIALS',credentials || "CREDENTIALS NOT SET")
         this.credentials = credentials
         
         
-        
-        console.log('SYMBOL',props, symbol,  symbol || "SYMBOL NOT SET")
-        if(symbol=== undefined || symbol.length<1) return  /// bail out
-        this.rawSymbol = symbol
-
 
         if(callback!== undefined ){
             this.callback = callback
         } 
         
-        
-        //[this.url,this.endpoint,this.symbol] = [config.url, endpoint, endpoint.split('@')[0]]
 
-        // if (endpoint === null || endpoint === undefined ) {
-        //     //this.endpoint = endpoint
-        //     sym=props.selectedTicker
-
-        // } else {
-            
-        //     sym=endpoint
-        //     //console.log('SYMBOL', this.symbol, this.endpoint || "")
-
-        // }
-        this.coin = this.rawSymbol.split('_')[0]
         this.transform = this.config.transform;
-        let tmp= new String(this.symbolRaw)
-        if(!this.transformed){
-            this.transform.symbol.forEach(transform => {
-                //console.log('SYMBOL EX',this.symbol)
-                //this.symbol = new String(this.rawSymbol)
-               tmp = tmp[transform]()
-               
-                this.transformed=true
-               //console.log('XFORMER SYMBOL',this.symbol,proto)
-               
-            });
-        
-        }
-        this.symbol = tmp
-        this.endpoint = this.symbol + 
-        this.config.transform.stream + 
-        this.config.transform.interval || "" +
-        this.config.transform.frequency || "" 
-        
-
-    
-        console.log('ENDPOINT WORKING?', this.endpoint)
-        if (this.rawSymbol.match(/\|/g) !== null && rawSymbol.match(/\|/g).length > 0) { //listenKey
-            // if (symbol.match(/\|/g).length === 1) {
-            //     this.symbolLower = this.rawSymbol.split('|')[0].replace('_','').toLowerCase()
-            //     this.endpoint = this.symbol.split('|')[1]
-            //     this.currency = this.endpoint.split('_')[1]
-                
-            // }
-        } else {
-            // if(this.component === 'depth'){
-            //     this.endpoint = ''
-            // }
-        
-        // if(this.rawSymbol.match(/\|/g) === null) {
-                
-
-        //     if (this.rawSymbol.match(/@/g) !== null && this.rawSymbol.match(/@/g).length=== 1) {
-        //         this.symbol = this.rawSymbol.split('@')[0]
-        //         this.endpoint = this.rawSymbol.split('@')[1]
-        //         this.currency = this.endpoint.split('_')[1]
-        //     } else if (this.rawSymbol.match(/@/g) !== null && this.rawSymbol.match(/@/g).length=== 2) { //depth
-        //         this.symbol = symbol.split('@')[0]
-        //         this.stream = symbol.split('@')[1]
-        //         this.interval = symbol.split('@')[2]
-        //         this.endpoint = this.symbol + '@' +this.stream + '@' + this.interval
-        //     } else {
-        //         console.log('WHAT AM I MISSING', this.symbolRaw, this.endpoint||'MISSING ENDPOINT')
-        //         return;
-        //     }
-
-        
-        }
-
        
-        //console.log('XFORMER WORKING', this.symbol)
+        if(this.transform!== undefined && this.transform.symbol.length > 0){ //!this.transformed
+  
+                let stringObject= String(this.symbolRaw)
+                let tmpEndpoint = this.symbolRaw
+            this.transform.symbol.forEach(transform => {
+                if(transform.match(/replace/g) !== null){
+                    let args = transform.split('|');
+                   tmpEndpoint = stringObject[args[0]](args[1],"").valueOf()
+                } else {
+                    tmpEndpoint= stringObject[transform]().valueOf()
+                }
+                stringObject= String(tmpEndpoint)
+            }); 
+           this.symbol= tmpEndpoint
+
+        } else {
+            this.symbol=this.symbolRaw
+           // console.log("SYMBOL--",this.symbol, this.symbolRaw)
+           
+        }
+        if(config.component !== 'orders'){
+            this.endpoint = this.symbol + 
+            this.config.transform.stream + 
+            this.config.transform.interval  +
+            this.config.transform.frequency 
+           
+        } else {
+            this.endpoint = this.symbolRaw
+            this.symbol = props.selectedTicker
+            this.symbolRaw = props.selectedTicker
+        }
+
+        //console.log('XFORMED ENDPOINT!!',this.component,this.symbol,this.url, this.endpoint,this.symbolRaw)
+
+        //console.log('INSTANCE',this.instance || "INSTANCE NOT SET")
+        if(!this.url || !this.endpoint ) return
+        if(this.instance === "2") return
+
         
-
-        console.log('SYMBOL/ENDPOINT',this.component,this.symbolRaw,this.symbol, this.endpoint)
-        // if(endpoint.length < 1){
-        //     this.endpoint = endpoint
-
-        // } else{
-        //     if(endpoint.includes('\|')){
-        //         this.symbol = endpoint.split('|')[0]
-        //         this.endpoint = endpoint.split('|')[1]
-        //     }
-        //     if(endpoint.includes('_')){
-        //         this.endpoint = endpoint
-        //         this.symbol = endpoint.split('@')[0]
-        //     }
-        // }
-if(!this.url || !this.endpoint ) return
-
-        console.log('connecting to',this.url+this.endpoint)
-        this.client = new RobustWebSocket(this.url+this.endpoint, null, {
+        let connectTo;
+        if(this.component === 'orders'){
+            //this.endpoint=''
+            connectTo = this.url+this.endpoint
+        } else {
+            connectTo = this.url+this.endpoint
+        }
+        console.log('connecting to',connectTo,this.component)
+        this.client = new RobustWebSocket(connectTo, null, {
             timeout: 60000,
             shouldReconnect:function()  { 
                 if(!this.url || !this.endpoint){
@@ -148,7 +114,7 @@ if(!this.url || !this.endpoint ) return
             }
         }
         )
-        console.log('NAME', this.name)
+        //console.log('NAME', this.name, update)
         //this.name = 'Binance';
         //this.config = config
         //this.symbol = props.selectedTicker
@@ -161,7 +127,7 @@ if(!this.url || !this.endpoint ) return
         //this.symbolRaw = props.selectedTicker || 'DOGE_USDT'
         //this.component = this.config.component;
         this.login = this.config.login || false;
-        this.update = update || [];
+        this.update = update ;
         this.prevPrices = update;
         this.callback = this.callback || (() => {})
         this.ping_id = 0;
@@ -183,7 +149,7 @@ if(!this.url || !this.endpoint ) return
             this.event = 'open'
             this.lastEvent = 'open'
             this.eventMessage = 'raw open'
-            //console.log("RAW OPEN S B O", event)
+            console.log("RAW OPEN S B O", event)
         });
         this.client.addEventListener('close', function (event) {
             this.event = 'close'
@@ -195,7 +161,7 @@ if(!this.url || !this.endpoint ) return
             this.event = 'message'
             this.lastEvent = 'message'
             this.eventMessage = 'raw message'
-            //console.log("RAW MESSAGE EVENT S B O", typeof event.data, event.data, event)
+            if(this.component === 'orders') console.log("RAW MESSAGE EVENT S B O", typeof event.data, event.data, event)
         });
 
         this.messageEvent = fromEvent(this.client, 'message');
@@ -215,19 +181,15 @@ if(!this.url || !this.endpoint ) return
             if (this.component === 'spot') { //spot
                 //console.log('SPOT SET')
 
-                this.setSpotData(json);
+                this.setSpotData(json,this.lastPrice);
             } else if (this.component === 'depth') {
+
                 //console.log('DEPTH SET')
                 this.setDepthData(json);
-            } else if (this.component === 'trade') {
+            } else if (this.component === 'market') {
                 //console.log('MARKET SET')
                 this.setMarketData(json);
             } else if (this.component === 'kline') {
-
-
-
-
-                //this.subId = em.id
 
                 // console.log('BULLSHIT! jsonId,event,jsonSymbol',json.id||'idunset', this.event||'evunset', this.lastEvent||'lastevunset', json.s||'symunset',this.eventMessage||'evMsgNotset' )
                 if (json.id === undefined && this.event === 'subscribe' && json.s !== undefined) {
@@ -248,7 +210,7 @@ if(!this.url || !this.endpoint ) return
             .pipe(filter(event => JSON.parse(event.data).e === 'executionReport'))
 
         this.blobEvent.subscribe(ev => {
-            // console.log('BLOB EVENT MESSAGE', ev.data)
+            console.log('BLOB EVENT MESSAGE', ev.data)
             let json = JSON.parse(ev.data);
 
             this.setOpenOrders(json);
@@ -286,12 +248,12 @@ if(!this.url || !this.endpoint ) return
 
             
             //console.log('pre pre Transform', json)
-            //console.log('TICKERS', this.tickers[this.name], this.symbol)
+            console.log('TICKERSXV', this.tickers[this.name], this.symbol, this.name)
 
 
 
 
-            let newTrade = this.transformer.getTradeStream(json, this.tickers[this.name])
+            let newTrade = this.transformer.getTradeStream(json, this.symbol,this.symbolRaw, this.tickers[this.name])
             if (newTrade.state === 'CANCELED') {
                 this.update = this.update.filter(trade => trade.order_id !== newTrade.order_id)
             } else {
@@ -309,13 +271,17 @@ if(!this.url || !this.endpoint ) return
 
     setSpotData(json) {
         this.component = 'spot'
+        console.log('setSpotData',json, this.symbolRaw,this.prevPrices)
+        if (json !== undefined || json.c !== undefined) {
 
-        if (json !== undefined) {
+            console.log('setSpotData10',json,this.symbolRaw, this.symbol, this.prevPrices)
+            let newState = this.transformer.getStream(json, this.symbol, this.symbolRaw, this.prevPrices);
 
-
-            let newState = this.transformer.getStream(json, this.symbolRaw, this.prevPrices);
-
-
+           // console.log('setSpotData',newState)
+            if(newState === undefined || newState.lastPrice === undefined){
+                return
+            }
+            console.log('LAST PRICE',json, this.symbolRaw,this.prevPrices)
             this.callback(newState);
             this.prevPrices.push(newState.lastPrice);
 
@@ -419,8 +385,10 @@ if(!this.url || !this.endpoint ) return
         this.event = 'close'
         this.lastEvent = 'close'
         this.eventMessage = 'close'
+        //this.client.close();
+        
         let id = setInterval(() => {
-            console.log('READYSTATE', this.client.readyState, this.component,this.endpoint)
+            //console.log('READYSTATE I', this.instance, this.client.readyState, this.component,this.endpoint)
             if (this.client.readyState === 3) {
                 clearInterval(id)
             } else if (this.client.readyState === 1) {
@@ -486,7 +454,7 @@ if(!this.url || !this.endpoint ) return
 
                 //this.client.url = config.url+ep.params[0]
 
-                console.log('SOCKET SENT SUBSCRIBE', msg, json)
+                //console.log('SOCKET SENT SUBSCRIBE', msg, json)
 
                 this.client.send(msg);
                 //this.client.close();
@@ -533,7 +501,7 @@ if(!this.url || !this.endpoint ) return
         this.lastEvent = 'send'
         console.log("SOCKET GOT", msg, this.client.readyState)
         let iiid = setInterval(() => {
-            console.log('READYSTATE', this.client.readyState, this.component, msg)
+            //console.log('READYSTATE', this.client.readyState, this.component, msg)
             if (this.client.readyState === 3) {
                 clearInterval(id)
             } else if (this.client.readyState === 1) {

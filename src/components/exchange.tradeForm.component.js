@@ -10,6 +10,7 @@ import { Tabs, Tab } from "react-bootstrap";
 import {SET_ALERT} from './types';
 import { AuthContext } from '../App';
 import { useHistory } from "react-router";
+import SocketFactory from './assets/socket.factory';
 
  const  ExchangeTradeForm = (props) => {
 // onTabSelect={onSelect} prev={prev} setTab={setKey} tab={key} exchange={props.exchange}
@@ -47,6 +48,13 @@ import { useHistory } from "react-router";
             })
         }
         var initalState = {
+            depth:{
+                
+            },
+            asset:[],
+            orderHistory:{
+                asset:[]
+            },
             name: props.exchange.name,
             apiKey: thisExchange.length > 0 ? thisExchange[0].apiKey: '',
             url: props.exchange.url,
@@ -94,7 +102,7 @@ useEffect(() => {
 }, [orderType]);
 
 useEffect(() => {
-    ;
+    
      setMounted(true)
       axios.get(props.exchange.url+'/tickers').then(result => {
             
@@ -133,26 +141,27 @@ useEffect(() => {
             
       return () => {
           //setData({})
-          console.log('LEAVING')
+          console.log('LEAVING 1')
       };
 }, []);  
 
 
+
  const onFocusTicker = e => {
 
-     setData({
-            ...data,
-            prevSelectedTicker: data.selectedTicker ? data.selectedTicker : "",
+    //  setData({
+    //         ...data,
+    //         prevSelectedTicker: data.selectedTicker ? data.selectedTicker : "",
             
-          });
+    //       });
  }
  const clearTicker = e => {
-    setData({
-        ...data,
-        selectedTicker:  "",
-        baseAsset:  ''
+    // setData({
+    //     ...data,
+    //     selectedTicker:  "",
+    //     baseAsset:  ''
 
-      });
+    //   });
  }
 const onChangeTicker = e => {
     //    
@@ -171,12 +180,14 @@ console.log('OnChangeTicker', e)
             sellAsset = e.value.replace(/.*_/g,"");
             
         }
-        setData({
-            ...data,
-            selectedTicker: e.value ? e.value : "",
-            baseAsset: e.value !== undefined ? asset : '',
-            sellAsset: sellAsset
-          });
+        setData(
+            {
+                ...data,
+                selectedTicker: e.value ? e.value : "",
+                baseAsset: e.value !== undefined ? asset : '',
+                sellAsset: sellAsset
+            }
+          );
           //data.wallet.filter( account => account.id === e.value.replace(/.*_/g,"") )
        // console.log('FILTERED WALLET',data.wallet, e.value.replace(/.*_/g,""));
   
@@ -262,9 +273,9 @@ function onSubmit(e) {
 
 
 }
-
-
-       //console.log('RETURN FORM', data, props)
+ //if( data.tickers === undefined ) return null
+console.log(`FORM DATA`, data);
+       console.log('RETURN FORM', data, props)
 return (       
     
             <div className="pl-0" style={{marginTop: '10px', marginLeft:'2px', marginRight:'2px'}}>
@@ -283,7 +294,14 @@ return (
                     </div>
                     <div className="form-group col-sm-6 mb-0"> 
                     
-                    <Spot PriceCallback={setCurrent} isMounted={mounted} onChangePrice={onChangePrice}  exchange={props.exchange} selectedTicker={data.selectedTicker}  />
+                    <Spot 
+                        instance="1"
+                        PriceCallback={setCurrent}
+                        isMounted={mounted}
+                        onChangePrice={onChangePrice}
+                        exchange={props.exchange}
+                        selectedTicker={data.selectedTicker}
+                    />
                     
                     </div>
 
@@ -309,14 +327,31 @@ return (
                                 onChange={onChangeQty}
                                 />
                     </div>
-                    <Wallet tab={props.tab} currentPrice={current_price} clearAmount={clearAmount} wallet={wallet} ticker={data.selectedTicker} setAmount={onChangeAmount}/>
+                    <Wallet
+                        instance="1"
+                        tab={props.tab}
+                        currentPrice={current_price}
+                        clearAmount={clearAmount}
+                        wallet={wallet}
+                        ticker={data.selectedTicker}
+                        setAmount={onChangeAmount}
+                    />
                     <div className="form-group mb-0 pb-0"> 
                         <label>Total:</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
                 </div>
                 <div className="col-sm-6 form-group">
-                
-                    <Depth onChangePrice={onChangePrice} clearTicker={clearTicker}  baseAsset={data.baseAsset}  exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
+                    <Depth
+                        // data={data.depth}
+                        instance="1"
+                        data={data} 
+                        setData={setData}
+                        onChangePrice={onChangePrice}
+                        baseAsset={data.baseAsset}
+                        exchange={props.exchange}
+                        selectedTicker={data.selectedTicker}
+                        prevSelectedTicker={data.prevSelectedTicker}
+                    />
                 </div>
                     
                 </div>
@@ -341,14 +376,32 @@ return (
                                 onChange={onChangeQty}
                                 />
                 </div>
-                <div><Wallet clearAmount={clearAmount}  tab={props.tab} wallet={wallet} ticker={data.selectedTicker}  setAmount={onChangeAmount}/></div>
+                <div>
+                    <Wallet
+                        clearAmount={clearAmount}
+                        instance="2" 
+                        tab={props.tab}
+                        wallet={wallet}
+                        ticker={data.selectedTicker} 
+                        setAmount={onChangeAmount}
+                    />
+                    </div>
                     <div className="form-group mb-0"> 
                         <label>Total:{data.selectedTicker}</label> <div style={{display:'inline-block'}} onChange={onChangeAmount}>{data.amount}</div> 
                     </div>
                 </div>
                 <div className="col-sm-6 form-group">
                     
-                    <Depth onChangePrice={onChangePrice} clearTicker={clearTicker}  baseAsset={data.baseAsset}  exchange={props.exchange} selectedTicker={data.selectedTicker} prevSelectedTicker={data.prevSelectedTicker}  />
+                    {/* <Depth
+                        data={data}
+                        setData={setData}
+                        instance="2"
+                        onChangePrice={onChangePrice}
+                        baseAsset={data.baseAsset}
+                        exchange={props.exchange}
+                        selectedTicker={data.selectedTicker}
+                        prevSelectedTicker={data.prevSelectedTicker}
+                    /> */}
                 </div>
                 </div>
                 
@@ -362,7 +415,8 @@ return (
                     </div>
                     <AssetList onChangePrice={onChangePrice}
                       tickers={data.tickers}
-                      data={data} clearTicker={clearTicker}
+                      data={data}
+                      setOrderHistory={setData}
                       setData={setData} 
                       selectedTicker={data.selectedTicker} 
                       exchange={props.exchange} 

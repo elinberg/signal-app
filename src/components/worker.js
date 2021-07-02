@@ -65,10 +65,11 @@ onmessage = function (event) {
 					name:'BitmartWebSocket',
 					component:'kline',
 					login:false,
+					subscribe:true,
 					url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1',
 					transform: {
 						symbol:['toUpperCase'],
-						stream:'@miniTicker',
+						stream:'kline',
 						interval:'',
 						frequency:''
 					}
@@ -76,9 +77,13 @@ onmessage = function (event) {
 				Binance:{name:'BinanceWebSocket',
 					component:'kline',
 					login:false,
+					subscribe:true,
 					url:'wss://stream.binance.com:9443/ws/',
 					transform: {
-						symbol:['toLowerCase'],
+						symbol:[
+							'toLowerCase',
+							"replace|-|'']"
+						],
 						stream:'@kline_',
 						interval:'1m',
 						frequency:''

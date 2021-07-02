@@ -89,10 +89,13 @@ class Transformer {
       return records;
     }
     if (this.name === 'Binance') {
-      console.log('BINANCE XFORM', json)
+      
 
-      json.forEach(trade => {
-        timestamp = Number.parseInt(trade.create_time) + 1000; //convert to milli's
+      json.data.forEach(trade => {
+
+        console.log('FOREACH', trade)
+
+        timestamp = Number.parseInt(trade.time) + 1000; //convert to milli's
         date = new Date(timestamp)
         formatted = date.toLocaleString("en-US", { month: "numeric" }) + '-' +
           date.toLocaleString("en-US", { day: "numeric" }) + ' ' +
@@ -100,20 +103,35 @@ class Transformer {
         records.push(
 
           {
-            order_id: trade.order_id,
-            detail_id: trade.detail_id,
+            order_id: trade.orderId,
+            detail_id: trade.orderId,
             avg_price: trade.price_avg === undefined ? trade.price_avg : trade.price,
-            price: trade.price,
+            price: parseFloat(trade.price).toFixed(2),
             pair: ticker.replace('_', '/'),
             side: trade.side,
-            qty: parseFloat(trade.size).toFixed(2),
-            cost: parseFloat(trade.notional).toFixed(2),
+            qty: parseFloat(trade.origQty).toFixed(2),
+            cost: parseFloat(parseFloat(trade.origQty) * parseFloat(trade.price)).toFixed(2),
             base: ticker.split('_')[1],
-            order_type: trade.exec_type === 'M' ? 'Market' : 'Limit',
+            order_type: trade.type === 'MARKET' ? 'Market' : 'Limit',
             transaction_date: formatted,
             state: 'EXISTING',
             status: 'WORKING'
           }
+          // {
+          //   order_id: trade.orderId,
+          //   detail_id: trade.detail_id,
+          //   avg_price: trade.price_avg === undefined ? trade.price_avg : trade.price,
+          //   price: trade.price,
+          //   pair: ticker.replace('_', '/'),
+          //   side: trade.side,
+          //   qty: parseFloat(trade.size).toFixed(2),
+          //   cost: parseFloat(trade.notional).toFixed(2),
+          //   base: ticker.split('_')[1],
+          //   order_type: trade.exec_type === 'M' ? 'Market' : 'Limit',
+          //   transaction_date: formatted,
+          //   state: 'EXISTING',
+          //   status: 'WORKING'
+          // }
         )
       })
 
@@ -121,9 +139,10 @@ class Transformer {
     }
   }
 
-  getStream(json, symbol, prevPrices) {
-    //console.log('GETSTREAM BEFORE',this.name,json, symbol, prevPrices);
+  getStream(json, raw, symbol, prevPrices) {
+    // console.log('GETSTREAM BEFORE',this.name,json, raw, symbol, prevPrices);
     var transformed = {};
+    transformed.lastPrice=0
     var len = prevPrices.length;
     var priceStyle = '';
     if (this.name === 'Bitmart') {
@@ -165,6 +184,7 @@ class Transformer {
         priceStyle = '';
       }
       //console.log('PREVIOUS', prevPrices[len - 1], json.c, Math.floor(parseFloat(prevPrices[len-1])*1000000)   > Math.floor(parseFloat(json.c)*1000000));
+      // console.log('GETSTREAM STYLE',prevPrices,parseFloat(prevPrices[len - 1]), parseFloat(json.c),  priceStyle)
       transformed = {
         lastPrice: json.c,
         high24hr: json.h,
@@ -173,12 +193,13 @@ class Transformer {
         volume24hr: json.v !== undefined ? json.v.split('.')[0] : '',
         priceStyle: priceStyle,
         prevPrice: prevPrices[len - 1],
-        baseAsset: symbol.replace(/.*_/g, "")
+        baseAsset: raw.replace(/.*_/g, "")
       };
+      // console.log('GETSTREAM AFTER', transformed)
       return transformed;
     }
   }
-  getTradeStream(trade, ticker) {
+  getTradeStream(trade, ticker, tickerRaw, tickers) {
     //console.log('GETSTREAM',this.name,json, symbol);
     var transformed = {};
     var timestamp, date, formatted, time;
@@ -328,16 +349,17 @@ class Transformer {
         date.toLocaleString("en-US", { day: "numeric" }) + ' ' +
         date.toLocaleTimeString('en-US')
       let cost = parseFloat(trade.p) * parseFloat(trade.q)
-      let tick = ticker.filter(ticker => ticker.orig === trade.s.toUpperCase());
+      let tick = tickers.filter(ticker => ticker.orig === tickerRaw.replace("_",""));
+      console.log('TRANSFORM TICKER, RAW', ticker,tickerRaw)
       transformed = {
         order_id: trade.i,
-        avg_price: trade.p,//(trade.p !== undefined && trade.p.length > 0) ? trade.p : '', 
-        price: trade.p, //(trade.p !== undefined && trade.p.length > 0) ? trade.p.match(/.*[1-9]/gm)[0] : '',
-        pair: tick[0].value.replace('_', '/'),
+        avg_price: parseFloat(parseFloat(trade.Z) / parseFloat(trade.z)).toFixed(2),//(trade.p !== undefined && trade.p.length > 0) ? trade.p : '', 
+        price: parseFloat(trade.p), //(trade.p !== undefined && trade.p.length > 0) ? trade.p.match(/.*[1-9]/gm)[0] : '',
+        pair: tick[0].value.replace('_','/'),
         side: trade.S,
         qty: parseFloat(trade.q).toFixed(2),
         cost: cost.toFixed(2),
-        base: tick[0].value.split('_')[1],
+        base: tickerRaw.split('_')[1],
         order_type: trade.o === 'market' || trade.o === 'MARKET' ? 'Market' : 'Limit',
         transaction_date: formatted,
         status: (trade.X !== undefined) ? trade.X : '',

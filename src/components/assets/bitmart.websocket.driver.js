@@ -7,7 +7,7 @@ const _transform = require('./transformer')
 
 export default class BitmartWebSocket {
     constructor(  config, props, credentials, trades, endpoint, callback){
-        return
+       // return
         //console.log("BITMART PROPS", config, props, credentials, trades)
         //return;
         let symbol = props.selectedTicker;
@@ -72,7 +72,7 @@ export default class BitmartWebSocket {
         
         });
 
-        if(this.component === 'trade') this.client.addEventListener('message', function(event){
+        if(this.component === 'market') this.client.addEventListener('message', function(event){
            
             //console.log(" RAW MESSAGE MARKET S B O ", typeof event.data, event.data, event )
        
@@ -123,7 +123,7 @@ export default class BitmartWebSocket {
                 } else  if(this.component === 'depth'){
                     //console.log('DEPTH SET')
                     this.setDepthData(json);
-                } else  if(this.component === 'trade'){ //market
+                } else  if(this.component === 'market'){ //market
                     //console.log('DEPTH SET')
                     this.setMarketData(json);
                 }
@@ -272,8 +272,8 @@ export default class BitmartWebSocket {
                 msg = {"op": "subscribe", "args":["spot/ticker:"+symbol]}
             } else if(this.component === 'depth5'){
                 msg = {"op": "subscribe", "args": ["spot/depth5:"+symbol]}
-            } else if(this.component === 'trade'){
-                msg = {"op": "subscribe", "args": ["spot/kline:"+symbol]} //market
+            } else if(this.component === 'market'){
+                msg = {"op": "subscribe", "args": ["spot/trade:"+symbol]} //market
             }else if(this.component === 'kline'){
                 this.prefix = ''
                 this.suffix = '_1m'
@@ -295,7 +295,7 @@ export default class BitmartWebSocket {
                 msg = {"op": "unsubscribe", "args":["spot/ticker:"+symbol]}
             } else if(this.component === 'depth5'){
                 msg = {"op": "unsubscribe", "args": ["spot/depth5:"+symbol]}
-            } else if(this.component === 'trade'){
+            } else if(this.component === 'market'){
                 msg = {"op": "unsubscribe", "args": ["spot/trade:"+symbol]}
             } 
            // console.log('getUnSubscribeMessage', msg )
@@ -306,6 +306,7 @@ export default class BitmartWebSocket {
         close(){
             
             let msg = this.getUnsubscribeMessage(this.symbol);
+            if(msg === undefined) return
             if(msg.length > 0){
                 let id = setInterval(() => {
                    // console.log('READYSTATE', this.client.readyState)

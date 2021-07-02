@@ -12,11 +12,12 @@ const Decompress = require("./assets/decompress").Decompress;
 
 const _transform = require('./assets/transformer');
 
-const OpenOrders  = props => {
+const openOrders  = props => {
+    
     let endpoint;
     //const [data, setData ] = useState({asset:[]});
     const decompress =  new Decompress(); //decompression class
-    console.log('OpenOrders', props)
+    //console.log('OpenOrders', props)
     let style;
     const client = []
 
@@ -25,33 +26,39 @@ const OpenOrders  = props => {
     var apiName = props.exchange[0].apiName;
     var secret = props.exchange[0].secret;
     var listenKey = '';
+    const [orderHistory, setOrderHistory ] = useState({asset:[]});
     useEffect(()=>{
-
+        
         if( 
             props === undefined ||
             props.exchange === undefined ||
             props.selectedTicker === undefined ||
-            props.selectedTicker.length < 1 ||
             props.data === undefined ||
-            history === undefined ||
-            props.data === undefined||
-            props.data.name.length < 1
+            props.data.name === undefined ||
+            orderHistory === undefined 
+            
     ){
         return null;
     }
-        console.log('CREDS',key,apiName,secret)
 
-        // props.setData({
-        //     ...props.data,
-        //     asset: []
-        // });
+    if(props.selectedTicker.length < 1 || props.data.name.length < 1 ) return null
+
+        //console.log('CREDS',key,apiName,secret)
+
+        props.setData({
+            ...props.data,
+            asset: []
+        });
     
-        console.log('GETTING TRADES', props);
+        //console.log('GETTING TRADES', props);
         if(props.selectedTicker === undefined || props.selectedTicker.length < 1){
             return null
         }
-        let transformer = new _transform(props.exchange[0].name);
-        axios.get('/api/'+props.data.name+'/trades?status=4&symbol='+props.selectedTicker, {
+
+       // console.log('GETTING TRADES 2', '/api/'+props.data.name+'/trades?status=4&symbol='+props.data.selectedTicker);
+        // 
+        let transformer = new _transform(props.data.name);
+        axios.get('/api/'+props.data.name+'/trades?status=4&symbol='+props.selectedTicker.replace("_",""), {
             timeout:5000,
             headers: {
             'xbmkey': key,
@@ -61,41 +68,49 @@ const OpenOrders  = props => {
         })
         .then(response => {
             // this.setState({ asset: response.data });
-            
-            console.log('TRADES DATA' , 
-                response.data,
-                props.data,
-                '/api/'+props.exchange.name+'/trades?status=4&symbol='+props.selectedTicker.toUpperCase()
-             );
-             endpoint=props.selectedTicker||''
-            orders = transformer.getTrades(response.data.trades,props.selectedTicker)
-            console.log('WARNING LISTENKEY', props.selectedTicker,response.data.listenKey);
-
-            if(props.exchange.name === 'Binance' &&
+            let listenKey
+            listenKey = response.data.listenKey
+            // console.log('TRADES DATA' , 
+            //     response.data,
+            //     props.data,
+            //     '/api/'+props.data.name+'/trades?status=4&symbol='+props.selectedTicker.toUpperCase()
+            //  );
+            endpoint=props.selectedTicker
+            orders = transformer.getTrades(response.data,props.selectedTicker)
+            // console.log('TRADES ORDERS' , 
+            //     orders,
+            //     response
+            //  );
+            if(props.data.name === 'Binance' &&
             response.data.listenKey !== undefined &&
             props.selectedTicker !== undefined){
                 console.log('LISTENKEY 69', props.data.name,props.selectedTicker,response.data.listenKey);
-                endpoint = props.selectedTicker+'|'+response.data.listenKey;
-
-                console.log('LISTENKEY', props.exchange+'|'+response.data.listenKey);
+                endpoint = response.data.listenKey;
+                listenKey = response.data.listenKey;
+               // console.log('LISTENKEY', props.data.name+'|'+response.data.listenKey);
                 
-            } else if(props.exchange.name === 'Bitmart'){
-                endpoint = props.selectedTicker.toUpperCase()
+            } else if(props.data.name === 'Bitmart'){
+                endpoint = props.data.selectedTicker.toUpperCase()
             }
             
-            if(props.exchange.name === 'Binance' && response.data.listenKey === undefined){
+            if(props.data.name === 'Binance' && response.data.listenKey === undefined){
                 endpoint = '';
-                console.log('WARNING LISTENKEY', props.selectedTicker,response.data.listenKey);
+                console.log('WARNING LISTENKEY', props.data.selectedTicker,response.data.listenKey);
             }
+            console.log('91',props)
+            
             props.setData({
                 ...props.data,
                 asset:orders
             });
-        })
+         //}) //ERIC
+         //console.log('ENDPOINT XS', endpoint)
         const config = { 
         Bitmart: {
             name:'BitmartWebSocket', 
             component:'orders', 
+            instance:0,
+            subscribe:true,
             login:true, 
             url: 'wss://ws-manager-compress.bitmart.com?protocol=1.1',
             transform: {
@@ -108,11 +123,16 @@ const OpenOrders  = props => {
         Binance: {
             name:'BinanceWebSocket', 
             component:'orders', 
+            instance:0,
             login:false, 
+            subscribe:true,
             url:'wss://stream.binance.us:9443/ws/',
             transform: {
-                symbol:['toLowerCase', 'valueOf'],
-                stream:'listenKey',
+                symbol:[
+                    'toLowerCase',
+                    "replace|_"
+                ],
+                stream:'order',
                 interval:'',
                 frequency:''
             } 
@@ -125,9 +145,11 @@ const OpenOrders  = props => {
         // orders,
         //     config
         // )
-
-        client[props.data.name] = SocketFactory.createInstance(config[props.data.name],
-            {selectedTicker:props.selectedTicker+endpoint},
+       // if(client[props.data.name] !== undefined) return
+       // console.log('ENDPOINT XS', endpoint)
+        client[props.data.name] = SocketFactory.createInstance(
+            config[props.data.name],
+            {selectedTicker:props.selectedTicker,tickers:props.tickers},
             {
                 key:key,
                 apiName:apiName,
@@ -140,9 +162,13 @@ const OpenOrders  = props => {
                     ...props.data,
                     asset:orders
                 }
-        );
+                );
             //console.log('CALLBACK DATA', spot);
-             });
+        });
+
+        })
+
+
     // let  messageEvent = fromEvent(client[props.data.name].client, 'message');
     // let  blobEvent = messageEvent.pipe(filter( event => event.data instanceof Blob ));
     // blobEvent.subscribe( ev=> {
@@ -161,13 +187,15 @@ const OpenOrders  = props => {
     return(()=>{
         let ords=[]
         props.setData({...props.data,orders:ords})
+        if(client[props.data.name] !== undefined) client[props.data.name].close()
+        
         console.log('Leaving')
     })
 
     },[props.selectedTicker])
 
 
-    console.log('OpenOrders1', props.data.asset, props);
+    //console.log('OpenOrders1', props.data.asset, props);
     return (
 
     props.data.asset.map((asset,i) =>{
@@ -194,12 +222,12 @@ const OpenOrders  = props => {
 
  const Asset  = props => {
     const decompress =  new Decompress(); //decompression class
-    console.log('AssetProps', props)
+    //console.log('AssetProps', props)
     let style;
     if(props.assets === undefined || props.assets.length < 1){
         return null;
     }
-    console.log('AssetProps1', props.assets);
+   // console.log('AssetProps1', props.assets);
     return (
 
        
@@ -212,7 +240,7 @@ const OpenOrders  = props => {
         }
         return  (
             <tr style={style} key={i}>
-                <td  className={ asset.side ==='buy' ? 'text-success' : 'text-danger' }>{asset.pair !== undefined ? asset.pair.replace(/_/g,"/") : ''}</td>
+                <td  className={ asset.side ==='buy' ? 'text-success' : 'text-danger' }>{asset.base !== undefined ? asset.base : ''}</td>
                 <td style={{textTransform: 'capitalize', whiteSpace:'nowrap'}} className=" ">{asset.price} {asset.order_type !== undefined ? asset.order_type :''}</td>
                 <td className="">{asset.qty !== undefined ? asset.qty : ''} </td>
                 <td style={{}} className="">{asset.cost} {asset.base}</td> 
@@ -227,7 +255,7 @@ const OpenOrders  = props => {
 ////END ASSET
 
 const OrderHistory = (props) => {
-    const [history, setHistory ] = useState({asset:[]});
+    // const [orderHistory, setOrderHistory ] = useState({asset:[]});
     const [fetched, setFetched] = React.useState(false);
     var histories = []  
     //const decompress =  new Decompress(); //decompression class
@@ -241,23 +269,34 @@ const OrderHistory = (props) => {
 
     useEffect(() => {
     if( 
-        props.selectedTicker === undefined ||
-        props.selectedTicker.length < 1 ||
+        
         props === undefined ||
+        props.selectedTicker === undefined ||
         props.data === undefined ||
-        props.data === undefined||
+        props.data.name === undefined 
+        // props.data.name.length < 1||
+        // props.selectedTicker.length < 1 
+    ){
+        return null;
+    }
+
+    if( 
         props.data.name.length < 1||
         props.selectedTicker.length < 1 
     ){
         return null;
     }
-    console.log('OrderHistory', props)
-    setHistory({
-        ...history,
+
+
+
+    //console.log('OrderHistory', props)
+    if(props.setOrderHistory === undefined) return
+    props.setOrderHistory({
+        ...orderHistory,
         asset: []
     });
     
-    console.log('GETTING ORDERS', props.exchange||'', props.data||'');
+    //console.log('GETTING ORDERS', props.exchange||'', props.data||'');
     let transformer = new _transform(props.data.name);
     const ac = new AbortController();
     Promise.all([
@@ -270,15 +309,14 @@ const OrderHistory = (props) => {
         })
     .then(response => {
        // this.setState({ asset: response.data });
-       console.log('ORDERS DATA' , response.data);
+       //console.log('ORDERS DATA' , response.data);
        histories= transformer.getTrades(response.data.trades, props.selectedTicker)
             
-                setHistory({
-                ...history,
+                setOrderHistory({
+                ...orderHistory,
                 asset: histories
                 });
-    })])
-    .then(() => { 
+    })]).then(() => { 
         setFetched(true);
         return function cancel() {
             console.log('ABORTING')
@@ -289,20 +327,22 @@ const OrderHistory = (props) => {
         
 
     return (() => {
-        setHistory({})
+        props.setOrderHistory({})
           // Abort fetches on unmount
         
-        return fetched;
+       // return fetched;
     })
     
 
 
-    }   , [props.selectedTicker, props.data.name]);  
-    // console.log('listOrderHistory', history)
+    }   , [props.selectedTicker]);  
+    
     let style;
+    if(props.data === undefined || props.data.orderHistory === undefined) return null;
+    //console.log('listOrderHistory', props.data.orderHistory, props.data,props)
     return (
 
-        history.asset.map((asset,i) =>{
+        props.data.orderHistory.asset.map((asset,i) =>{
             if( asset.state !== undefined && asset.state === 'CANCELED'){
                 style = {textDecoration: 'line-through'}
             } else {
@@ -325,7 +365,7 @@ const OrderHistory = (props) => {
 const AssetList = props => {
 //export default className AssetList extends Component {
    // const [intervalId, setIntervalId ] = useState('');
-   // const [history, setHistory ] = useState({asset:[]});
+   // const [orderHistory, setOrderHistory ] = useState({asset:[]});
     //const [data, setData ] = useState({asset:[]});
     //const [socket, setSocket ] = useState({wss:[], exchange:{}});
     
@@ -384,7 +424,7 @@ const AssetList = props => {
     <div className="carousel-item active">
     <Table size="sm" className="font-face-din fx-11 mb-0" style={{ marginTop: 0 , width:'100%', minWidth:'375px',textAlign:'left' }} >
         <tbody style={{ overflow:'auto'}}>
-            <OpenOrders exchange={thisExchange} selectedTicker={props.selectedTicker}  setData={props.setData}   data={props.data}   />
+            {openOrders( {exchange:thisExchange, data:props.data, setData:props.setData, selectedTicker:props.selectedTicker, tickers:props.tickers } )}
             
         </tbody>
     </Table>
@@ -399,7 +439,7 @@ const AssetList = props => {
     <div className="carousel-item">
     <div size="sm" className="font-face-din fx-11 mb-0" style={{ marginTop: 0 , width:'100%', minWidth:'375px',textAlign:'left' }} >
         <div style={{ overflow:'auto'}}>
-        <Market onChangePrice={props.onChangePrice} clearTicker={props.clearTicker}  baseAsset={props.data.baseAsset}  exchange={props.exchange} selectedTicker={props.selectedTicker} prevSelectedTicker={props.prevSelectedTicker}  />
+        <Market instance="0" onChangePrice={props.onChangePrice}  baseAsset={props.data.baseAsset}  exchange={props.exchange} selectedTicker={props.selectedTicker} prevSelectedTicker={props.prevSelectedTicker}  />
         </div>
     </div>
     </div>
